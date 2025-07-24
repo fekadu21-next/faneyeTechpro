@@ -9,7 +9,8 @@ import Footer from '../../components/Footer';
 export default function AIDiagnosisPage() {
   const [mounted, setMounted] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
-  const [responses, setResponses] = useState({});
+  const [responses, setResponses] = useState<Record<string, string[]>>({});
+
   const [showResults, setShowResults] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
   const [recommendedServices, setRecommendedServices] = useState([]);
@@ -285,20 +286,27 @@ export default function AIDiagnosisPage() {
     setMounted(true);
   }, []);
 
-  const handleResponse = (questionId, answer) => {
-    if (!mounted) return;
-    
-    const question = aiQuestions.find(q => q.id === questionId);
-    if (question.type === 'multiple') {
-      const currentAnswers = responses[questionId] || [];
-      const newAnswers = currentAnswers.includes(answer)
-        ? currentAnswers.filter(a => a !== answer)
-        : [...currentAnswers, answer];
-      setResponses(prev => ({ ...prev, [questionId]: newAnswers }));
-    } else {
-      setResponses(prev => ({ ...prev, [questionId]: answer }));
-    }
-  };
+const handleResponse = (questionId: string | number, answer: string) => {
+  if (!mounted) return;
+
+  const question = aiQuestions.find(q => q.id === String(questionId));
+  if (!question) return;
+
+  if (question.type === 'multiple') {
+    const currentAnswers = (responses[questionId] as string[]) || [];
+    const newAnswers = currentAnswers.includes(answer)
+      ? currentAnswers.filter((a: string) => a !== answer)
+      : [...currentAnswers, answer];
+
+    setResponses({ ...responses, [questionId]: newAnswers });
+  } else {
+    setResponses({ ...responses, [questionId]: [answer] });
+  }
+};
+
+
+
+
 
   const nextStep = () => {
     if (!mounted) return;
