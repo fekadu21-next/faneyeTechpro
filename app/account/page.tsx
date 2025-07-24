@@ -111,7 +111,7 @@ export default function AccountPage() {
     setActiveTab('profile');
   };
 
-  const handleVerificationCodeChange = (index, value) => {
+  const handleVerificationCodeChange = (index: number, value: string) => {
     if (!mounted) return;
     
     const newCode = [...verificationCode];
