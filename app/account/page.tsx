@@ -697,7 +697,8 @@ export default function AccountPage() {
                           key={index}
                           id={`code-${index}`}
                           type="text"
-                          maxLength="1"
+                          maxLength={1}
+
                           value={digit}
                           onChange={(e) => handleVerificationCodeChange(index, e.target.value)}
                           className="w-12 h-12 text-center border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A] text-lg font-medium"
