@@ -1,6 +1,4 @@
-
 'use client';
-
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
 import Link from 'next/link';
@@ -9,21 +7,28 @@ import { useState, useEffect } from 'react';
 export default function WarehousePage() {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedResource, setSelectedResource] = useState(null);
+  type Resource = any;
+  const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+
   const [mounted, setMounted] = useState(false);
   const [filterType, setFilterType] = useState('all');
   const [sortBy, setSortBy] = useState('popular');
-  const [downloadStatus, setDownloadStatus] = useState(null);
+  type DownloadStatusType = {
+  type: string;
+  message: string;
+  resource:  any;
+};
+ const [downloadStatus, setDownloadStatus] = useState<DownloadStatusType | null>(null);
   const [isDownloading, setIsDownloading] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedDifficulty, setSelectedDifficulty] = useState('all');
   const [selectedFormat, setSelectedFormat] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
-  const [favorites, setFavorites] = useState([]);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>([]);
   const [showResourceComparison, setShowResourceComparison] = useState(false);
-  const [comparisonList, setComparisonList] = useState([]);
+  const [comparisonList, setComparisonList] = useState<number[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -33,7 +38,7 @@ export default function WarehousePage() {
     setFavorites(savedFavorites);
     setRecentlyViewed(savedRecentlyViewed);
   }, []);
-
+  
   const categories = [
     { id: 'all', name: 'All Resources', icon: 'ri-apps-line', count: 180, description: 'Complete collection of all available resources' },
     { id: 'templates', name: 'Templates & Frameworks', icon: 'ri-file-text-line', count: 55, description: 'Ready-to-use business templates and frameworks' },
@@ -323,7 +328,8 @@ export default function WarehousePage() {
       .sort((a, b) => {
         if (sortBy === 'popular') return b.downloads - a.downloads;
         if (sortBy === 'rating') return b.rating - a.rating;
-        if (sortBy === 'recent') return new Date(b.lastUpdated) - new Date(a.lastUpdated);
+        if (sortBy === 'recent') return new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime();
+
         if (sortBy === 'title') return a.title.localeCompare(b.title);
         if (sortBy === 'price-low') return a.price - b.price;
         if (sortBy === 'price-high') return b.price - a.price;
@@ -333,27 +339,28 @@ export default function WarehousePage() {
 
   const filteredResources = filterResources();
 
-  const toggleFavorite = (resourceId) => {
-    const newFavorites = favorites.includes(resourceId)
-      ? favorites.filter(id => id !== resourceId)
-      : [...favorites, resourceId];
-    setFavorites(newFavorites);
-    localStorage.setItem('favorites', JSON.stringify(newFavorites));
-  };
+const toggleFavorite = (resourceId: number) => {
+  const newFavorites = (favorites as number[]).includes(resourceId)
+    ? (favorites as number[]).filter((id: number) => id !== resourceId)
+    : [...(favorites as number[]), resourceId];
+  setFavorites(newFavorites);
+  localStorage.setItem('favorites', JSON.stringify(newFavorites));
+};
 
-  const addToRecentlyViewed = (resource) => {
+  const addToRecentlyViewed = (resource: any) => {
+
     const updated = [resource.id, ...recentlyViewed.filter(id => id !== resource.id)].slice(0, 10);
     setRecentlyViewed(updated);
     localStorage.setItem('recentlyViewed', JSON.stringify(updated));
   };
+  const handleResourceClick = (resource: any) => {
 
-  const handleResourceClick = (resource) => {
     if (!mounted) return;
     addToRecentlyViewed(resource);
     setSelectedResource(resource);
   };
+  const toggleComparison = (resourceId: number) => {
 
-  const toggleComparison = (resourceId) => {
     if (comparisonList.includes(resourceId)) {
       setComparisonList(comparisonList.filter(id => id !== resourceId));
     } else if (comparisonList.length < 3) {
@@ -361,7 +368,7 @@ export default function WarehousePage() {
     }
   };
 
-  const handleDownload = async (resource) => {
+  const handleDownload = async (resource: any) => {
     if (!mounted) return;
 
     // Check if it's a premium resource and user doesn't have access
@@ -931,7 +938,7 @@ export default function WarehousePage() {
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-[#1F3D3A] mb-3">Tags</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedResource.tags.map((tag, index) => (
+                      {(selectedResource as any)?.tags?.map((tag: any, index: number) => (
                         <span key={index} className="px-3 py-2 bg-[#1F3D3A]/10 text-[#1F3D3A] rounded-full text-sm font-medium">
                           {tag}
                         </span>

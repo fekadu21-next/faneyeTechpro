@@ -158,30 +158,36 @@ export default function BusinessRegistrationPage() {
     'Evenings only'
   ];
 
-  const updateFormData = (field, value) => {
+  const updateFormData = (field: string, value: any) => {
+
     if (!mounted) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleTypeSelection = (typeId) => {
+ const handleTypeSelection = (typeId: string) => {
+
     if (!mounted) return;
     setSelectedType(typeId);
     setCurrentStep(2);
   };
 
-  const addSkill = (skill) => {
+  const addSkill = (skill: string) => {
+
     if (!mounted) return;
-    if (!formData.skills.includes(skill)) {
-      updateFormData('skills', [...formData.skills, skill]);
-    }
+   if (!(formData.skills as string[]).includes(skill)) {
+  updateFormData('skills', [ ...(formData.skills as string[]), skill ]);
+}
+
   };
 
-  const removeSkill = (skill) => {
+ const removeSkill = (skill: string) => {
+
     if (!mounted) return;
     updateFormData('skills', formData.skills.filter(s => s !== skill));
   };
 
-  const handleSubmit = async (e) => {
+ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
     e.preventDefault();
     if (!mounted) return;
 
@@ -723,13 +729,16 @@ export default function BusinessRegistrationPage() {
                           <div key={category} className="border border-gray-200 rounded-lg p-4">
                             <h4 className="font-medium text-gray-800 mb-3">{category}</h4>
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                              {skillOptions[category]?.map((skill) => (
+                              {skillOptions[category as keyof typeof skillOptions]?.map((skill) => (
                                 <button
                                   key={skill}
                                   type="button"
-                                  onClick={() => formData.skills.includes(skill) ? removeSkill(skill) : addSkill(skill)}
+                                  onClick={() => ((formData.skills as string[]).includes(skill) ? removeSkill(skill) : addSkill(skill))}
+
                                   className={`px-3 py-2 text-sm rounded-full transition-colors cursor-pointer ${
-                                    formData.skills.includes(skill)
+                                  (formData.skills as string[]).includes(skill)
+
+
                                       ? 'bg-[#1F3D3A] text-white'
                                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                   }`}
@@ -768,8 +777,8 @@ export default function BusinessRegistrationPage() {
                         name="portfolioLinks"
                         value={formData.portfolioLinks}
                         onChange={(e) => updateFormData('portfolioLinks', e.target.value)}
-                        rows="3"
-                        maxLength="500"
+                        rows={3}
+                        maxLength={500}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Share links to your portfolio, GitHub, Behance, LinkedIn, or previous work examples (one per line)"
                       />
@@ -784,8 +793,8 @@ export default function BusinessRegistrationPage() {
                         name="certifications"
                         value={formData.certifications}
                         onChange={(e) => updateFormData('certifications', e.target.value)}
-                        rows="3"
-                        maxLength="500"
+                        rows={3}
+                        maxLength={500}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="List your relevant certifications, degrees, training, and qualifications"
                       />
@@ -936,7 +945,7 @@ export default function BusinessRegistrationPage() {
                           <label key={type} className="flex items-center cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={formData.projectTypes.includes(type)}
+                              checked={(formData.projectTypes as string[]).includes(type)}
                               onChange={(e) => {
                                 if (e.target.checked) {
                                   updateFormData('projectTypes', [...formData.projectTypes, type]);
@@ -1086,7 +1095,8 @@ export default function BusinessRegistrationPage() {
                           <label key={channel} className="flex items-center cursor-pointer">
                             <input
                               type="checkbox"
-                              checked={formData.communicationChannels?.includes(channel)}
+                              checked={(formData.communicationChannels as string[])?.includes(channel)}
+
                               onChange={(e) => {
                                 const channels = formData.communicationChannels || [];
                                 if (e.target.checked) {
@@ -1127,8 +1137,8 @@ export default function BusinessRegistrationPage() {
                         name="specificRequirements"
                         value={formData.specificRequirements}
                         onChange={(e) => updateFormData('specificRequirements', e.target.value)}
-                        rows="4"
-                        maxLength="1000"
+                        rows={4}
+                        maxLength={1000}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Tell us about any specific requirements, preferences, quality standards, compliance needs, or any other information that would help us match you with the right professionals..."
                       />

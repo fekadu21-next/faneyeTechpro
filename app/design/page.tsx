@@ -8,11 +8,18 @@ import { useState, useEffect } from 'react';
 
 export default function DesignPage() {
   const [activePortfolioTab, setActivePortfolioTab] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<{
+  title?: string;
+  image?: string;
+  results?: string[];
+  [key: string]: any;
+} | null>(null);
+
   const [viewMode, setViewMode] = useState('grid');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('newest');
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState<string[]>([]);
+
   const [showFilters, setShowFilters] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState({
     year: '',
@@ -20,7 +27,8 @@ export default function DesignPage() {
     award: false
   });
   const [showComparison, setShowComparison] = useState(false);
-  const [comparisonProjects, setComparisonProjects] = useState([]);
+  const [comparisonProjects, setComparisonProjects] = useState<{ id: string }[]>([]);
+
   const [activeServiceTab, setActiveServiceTab] = useState(0);
 
   useEffect(() => {
@@ -367,7 +375,8 @@ export default function DesignPage() {
     'LearnEthio', 'TeleMed Ethiopia', 'Ethiopian Airlines', 'Commercial Bank of Ethiopia'
   ];
 
-  const toggleFavorite = (projectId) => {
+  const toggleFavorite = (projectId: string) => {
+
     const newFavorites = favorites.includes(projectId)
       ? favorites.filter(id => id !== projectId)
       : [ ...favorites, projectId ];
@@ -375,13 +384,15 @@ export default function DesignPage() {
     localStorage.setItem('designFavorites', JSON.stringify(newFavorites));
   };
 
-  const addToComparison = (project) => {
+  const addToComparison = (project: any) => {
+
     if (comparisonProjects.length < 3 && !comparisonProjects.find(p => p.id === project.id)) {
       setComparisonProjects([ ...comparisonProjects, project ]);
     }
   };
 
-  const removeFromComparison = (projectId) => {
+ const removeFromComparison = (projectId: string) => {
+
     setComparisonProjects(comparisonProjects.filter(p => p.id !== projectId));
   };
 
@@ -410,7 +421,11 @@ export default function DesignPage() {
     }
   });
 
-  const uniqueYears = [ ...new Set(projects.map(p => p.year)) ].sort((a, b) => b - a);
+  const uniqueYears = [...new Set(projects.map(p => p.year))]
+  .map(year => Number(year))
+  .filter(year => !isNaN(year))
+  .sort((a, b) => b - a);
+
   const uniqueClients = [ ...new Set(projects.map(p => p.client)) ].sort();
 
   return (
@@ -719,7 +734,12 @@ export default function DesignPage() {
                   <div className="flex gap-2">
                     {comparisonProjects.map(project => (
                       <span key={project.id} className="bg-white/20 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                        {project.title.substring(0, 20)}...
+                        {projects.map((project: { title: string }) => (
+  <div key={project.title}>
+    {project.title.substring(0, 20)}...
+  </div>
+))}
+.
                         <button
                           onClick={() => removeFromComparison(project.id)}
                           className="hover:bg-white/20 rounded-full w-4 h-4 flex items-center justify-center cursor-pointer"
@@ -772,18 +792,21 @@ export default function DesignPage() {
                     ></div>
                     <div className="absolute top-4 right-4 flex gap-2">
                       <button
-                        onClick={() => toggleFavorite(project.id)}
+                        onClick={() => toggleFavorite(String(project.id))}
+
                         className={`w-8 h-8 flex items-center justify-center backdrop-blur-sm transition-colors cursor-pointer ${
-                          favorites.includes(project.id)
+                         favorites.includes(String(project.id))
+
                             ? 'bg-red-500 text-white'
                             : 'bg-white/80 text-gray-600 hover:bg-red-500 hover:text-white'
                         }`}
                       >
-                        <i className={`ri-heart-${favorites.includes(project.id) ? 'fill' : 'line'} text-sm`}></i>
+                        <i className={`ri-heart-${favorites.includes(String(project.id)) ? 'fill' : 'line'} text-sm`}></i>
                       </button>
                       <button
                         onClick={() => addToComparison(project)}
-                        disabled={comparisonProjects.length >= 3 || comparisonProjects.find(p => p.id === project.id)}
+                       disabled={comparisonProjects.length >= 3 || comparisonProjects.some((p: any) => p.id === project.id)}
+
                         className="w-8 h-8 flex items-center justify-center bg-white/80 rounded-full hover:bg-[#1F3D3A] hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <i className="ri-add-line text-sm"></i>
@@ -837,7 +860,8 @@ export default function DesignPage() {
                     </div>
 
                     <button
-                      onClick={() => setSelectedProject(project)}
+                      onClick={() => setSelectedProject(project as any)}
+
                       className="w-full bg-[#1F3D3A] text-white py-3 rounded-full hover:bg-[#2a5248] transition-colors whitespace-nowrap cursor-pointer"
                     >
                       View Case Study
@@ -879,18 +903,20 @@ export default function DesignPage() {
                         </div>
                         <div className="flex gap-2">
                           <button
-                            onClick={() => toggleFavorite(project.id)}
+                            onClick={() => toggleFavorite((project as any).id)}
+
                             className={`w-8 h-8 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
-                              favorites.includes(project.id)
+                              favorites.includes((project as any).id)
+
                                 ? 'bg-red-500 text-white'
                                 : 'bg-gray-100 text-gray-600 hover:bg-red-500 hover:text-white'
                             }`}
                           >
-                            <i className={`ri-heart-${favorites.includes(project.id) ? 'fill' : 'line'} text-sm`}></i>
+                            <i className={`ri-heart-${favorites.includes((project as any).id) ? 'fill' : 'line'} text-sm`}></i>
                           </button>
                           <button
                             onClick={() => addToComparison(project)}
-                            disabled={comparisonProjects.length >= 3 || comparisonProjects.find(p => p.id === project.id)}
+                           disabled={comparisonProjects.length >= 3 || !!comparisonProjects.find(p => (p as any).id === project.id)}
                             className="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-full hover:bg-[#1F3D3A] hover:text-white transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <i className="ri-add-line text-sm"></i>
@@ -926,7 +952,8 @@ export default function DesignPage() {
                           ))}
                         </div>
                         <button
-                          onClick={() => setSelectedProject(project)}
+                          onClick={() => setSelectedProject(project as any)}
+
                           className="bg-[#1F3D3A] text-white px-6 py-2 rounded-full hover:bg-[#2a5248] transition-colors whitespace-nowrap cursor-pointer"
                         >
                           View Details
@@ -974,12 +1001,14 @@ export default function DesignPage() {
                           <div
                             className="h-24 rounded-lg mb-3"
                             style={{
-                              backgroundImage: `url('${project.image}')`,
-                              backgroundSize: 'cover',
-                              backgroundPosition: 'center'
-                            }}
+  backgroundImage: `url('${(project as { image?: string })?.image ?? ''}')`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+}}
+
                           ></div>
-                          <div className="font-bold text-[#1F3D3A]">{project.title}</div>
+                    <div className="font-bold text-[#1F3D3A]">{(project as { title?: string })?.title ?? ''}</div>
+
                         </th>
                       ))}
                     </tr>
@@ -1002,12 +1031,14 @@ export default function DesignPage() {
                             {attr.key === 'rating' ? (
                               <div className="flex items-center justify-center gap-1">
                                 <i className="ri-star-fill text-yellow-500"></i>
-                                <span>{project[attr.key]}</span>
+                                <span>{project[attr.key as keyof typeof project]}</span>
+
                               </div>
                             ) : (
-                              <span className={attr.key === 'status' && project[attr.key] === 'Launched' ? 'text-green-600 font-medium' : ''}>
-                                {project[attr.key]}
-                              </span>
+                            <span className={attr.key === 'status' && project[attr.key as keyof typeof project] === 'Launched' ? 'text-green-600 font-medium' : ''}>
+  {project[attr.key as keyof typeof project]}
+</span>
+
                             )}
                           </td>
                         ))}
@@ -1107,7 +1138,8 @@ export default function DesignPage() {
                   <div className="mb-6">
                     <h3 className="font-semibold text-[#1F3D3A] mb-3">Key Results</h3>
                     <ul className="space-y-2">
-                      {selectedProject.results.map((result, index) => (
+                      {selectedProject?.results?.map((result, index) => (
+
                         <li key={index} className="flex items-center text-gray-600">
                           <i className="ri-check-line text-green-500 mr-2"></i>
                           {result}
@@ -1128,7 +1160,8 @@ export default function DesignPage() {
                   <div>
                     <h3 className="font-semibold text-[#1F3D3A] mb-3">Technologies & Tools</h3>
                     <div className="flex flex-wrap gap-2">
-                      {selectedProject.tags.map((tag, index) => (
+                      {(selectedProject as { tags: string[] })?.tags?.map((tag, index) => (
+
                         <span key={index} className="px-3 py-1 bg-[#1F3D3A]/10 text-[#1F3D3A] rounded-full text-sm">
                           {tag}
                         </span>

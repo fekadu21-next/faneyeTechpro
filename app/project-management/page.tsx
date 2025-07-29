@@ -17,7 +17,7 @@ export default function ProjectManagementPage() {
   const [showResourcePlanner, setShowResourcePlanner] = useState(false);
   const [showRiskAssessment, setShowRiskAssessment] = useState(false);
   const [showAccountSettings, setShowAccountSettings] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<ProjectType | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [calendarView, setCalendarView] = useState('month');
   const [dashboardView, setDashboardView] = useState('overview');
@@ -48,6 +48,7 @@ export default function ProjectManagementPage() {
     milestones: []
   });
 
+  
   const [userProfile, setUserProfile] = useState({
     name: 'Sarah Johnson',
     email: 'sarah.johnson@company.com',
@@ -74,6 +75,25 @@ export default function ProjectManagementPage() {
       weekly_reports: true
     }
   });
+  
+type ProjectType = {
+  id: number;
+  title: string;
+  status: string;
+  progress: number;
+  deadline: string;
+  budget: number;
+  spent: number;
+  team: string[];
+  priority: string;
+  category: string;
+  client: string;
+  startDate: string;
+  riskLevel: string;
+    healthScore: number;
+  // Add other fields as needed, especially the one mentioned: risks
+  risks: { id: number; description: string; level: string }[];
+};
 
   const projects = [
     {
@@ -273,15 +293,15 @@ export default function ProjectManagementPage() {
     }
   ];
 
-  const getDaysInMonth = (date) => {
+  const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
   };
 
-  const getFirstDayOfMonth = (date) => {
+  const getFirstDayOfMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
   };
 
-  const formatDate = (date) => {
+  const formatDate = (date: Date) => {
     return date.toISOString().split('T')[0];
   };
 
@@ -722,7 +742,14 @@ export default function ProjectManagementPage() {
                             ></div>
                           </div>
                           <button
-                            onClick={() => setSelectedProject(project)}
+                            onClick={() => setSelectedProject({...project,
+  risks: project.risks.map(risk => ({
+    id: risk.id,
+    description: risk.description,
+    level: `${risk.impact}-${risk.probability}`
+  }))
+})}
+
                             className="text-[#1F3D3A] hover:text-[#2a5248] cursor-pointer"
                           >
                             <i className="ri-eye-line"></i>
@@ -732,7 +759,6 @@ export default function ProjectManagementPage() {
                     ))}
                   </div>
                 </div>
-
                 <div className="space-y-6">
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Team Performance</h3>
@@ -756,7 +782,6 @@ export default function ProjectManagementPage() {
                       ))}
                     </div>
                   </div>
-
                   <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Recent Activity</h3>
                     <div className="space-y-3">
@@ -786,7 +811,6 @@ export default function ProjectManagementPage() {
               </div>
             </div>
           )}
-
           {activeTab === 'projects' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
@@ -911,7 +935,7 @@ export default function ProjectManagementPage() {
                         setSelectedProject(null);
                       } else {
                         const project = projects.find((p) => p.id === parseInt(projectId));
-                        setSelectedProject(project);
+                        setSelectedProject(project as any)
                       }
                     }}
                     className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A] pr-8"
@@ -1328,11 +1352,12 @@ export default function ProjectManagementPage() {
                         <div className="text-xs text-gray-600">Health Score</div>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl font-bold text-blue-600">{selectedProject.velocity}</div>
+                        <div className="text-2xl font-bold text-blue-600">{(selectedProject as any).velocity}
+</div>
                         <div className="text-xs text-gray-600">Velocity</div>
                       </div>
                       <div className="text-center p-3 bg-white rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">{(selectedProject.burndownRate * 100).toFixed(0)}%</div>
+                        <div className="text-2xl font-bold text-purple-600">{((selectedProject as any).burndownRate * 100).toFixed(0)}%</div>
                         <div className="text-xs text-gray-600">Burndown</div>
                       </div>
                     </div>
@@ -1342,7 +1367,9 @@ export default function ProjectManagementPage() {
                     <div className="bg-gray-50 p-6 rounded-xl">
                       <h4 className="font-semibold text-gray-800 mb-3">Project Tasks</h4>
                       <div className="space-y-3">
-                        {selectedProject.tasks?.map((task) => (
+                        {(selectedProject as any)?.tasks?.map((task: { id: number; title: string; assignee?: string; progress?: number; status?: string }) => (
+
+
                           <div key={task.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
                             <div>
                               <div className="font-medium text-gray-800 text-sm">{task.title}</div>
@@ -1361,11 +1388,10 @@ export default function ProjectManagementPage() {
                         ))}
                       </div>
                     </div>
-
                     <div className="bg-gray-50 p-6 rounded-xl">
                       <h4 className="font-semibold text-gray-800 mb-3">Milestones</h4>
                       <div className="space-y-3">
-                        {selectedProject.milestones?.map((milestone) => (
+                        {((selectedProject as { milestones?: { id: number; title: string; date: string; status: string }[] })?.milestones ?? []).map((milestone) => (
                           <div key={milestone.id} className="flex items-center justify-between p-3 bg-white rounded-lg">
                             <div>
                               <div className="font-medium text-gray-800 text-sm">{milestone.title}</div>
@@ -1445,9 +1471,10 @@ export default function ProjectManagementPage() {
                             <div>
                               <div className="font-medium">{risk.description}</div>
                               <div className="text-xs text-red-600">
-                                Impact: {risk.impact} | Probability: {risk.probability}
+                                Impact: {(risk as any).impact} | Probability: {(risk as any).probability}
+
                               </div>
-                              <div className="text-xs text-red-600">Mitigation: {risk.mitigation}</div>
+                              <div className="text-xs text-red-600">Mitigation: {(risk as any).mitigation}</div>
                             </div>
                           </div>
                         ))}
@@ -1552,7 +1579,8 @@ export default function ProjectManagementPage() {
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Working Hours</label>
-                          <p className="text-gray-900">{userProfile.workingHours}</p>
+                          <p className="text-gray-900">{(userProfile as any).workingHours}</p>
+
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Preferred Language</label>
@@ -2051,10 +2079,10 @@ export default function ProjectManagementPage() {
                     <div>
                       <h3 className="text-lg font-semibold text-gray-800 mb-4">Professional Bio</h3>
                       <textarea
-                        rows="4"
+                        rows={4}
                         placeholder="Write a brief professional bio that highlights your experience and expertise..."
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
-                        maxLength="500"
+                        maxLength={500}
                       ></textarea>
                       <div className="text-sm text-gray-500 mt-1">0/500 characters</div>
                     </div>

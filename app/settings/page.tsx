@@ -144,28 +144,33 @@ export default function SettingsPage() {
     setMounted(true);
   }, []);
 
-  const handleSettingChange = (section, key, value) => {
+const handleSettingChange = (section: string, key: string, value: any) => {
+
     if (!mounted) return;
     
     setSettings(prev => ({
       ...prev,
       [section]: {
-        ...prev[section],
+        ...prev[section as keyof typeof prev],
+
         [key]: value
       }
     }));
     setIsChanged(true);
   };
 
-  const handleNestedSettingChange = (section, parentKey, key, value) => {
+  const handleNestedSettingChange = (section: string, parentKey: string, key: string, value: any) => {
+
     if (!mounted) return;
     
     setSettings(prev => ({
       ...prev,
       [section]: {
-        ...prev[section],
+        ... (prev as any)[section],
+
         [parentKey]: {
-          ...prev[section][parentKey],
+          ... (prev as any)[section],
+
           [key]: value
         }
       }

@@ -14,7 +14,8 @@ export default function Footer() {
     setMounted(true);
   }, []);
 
-  const handleNewsletterSubmit = async (e) => {
+  const handleNewsletterSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
     e.preventDefault();
     if (!mounted || !email || isSubscribing) return;
 

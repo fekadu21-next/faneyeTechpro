@@ -8,7 +8,7 @@ import Footer from '../../components/Footer';
 
 export default function ProjectsPage() {
   const [activeTab, setActiveTab] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedProject, setSelectedProject] = useState<any>(null);
   const [viewMode, setViewMode] = useState('grid');
   const [sortBy, setSortBy] = useState('recent');
   const [filterCategory, setFilterCategory] = useState('all');
@@ -235,7 +235,8 @@ export default function ProjectsPage() {
   const categories = [...new Set(projects.map(p => p.category))];
   const clients = [...new Set(projects.map(p => p.client))];
 
-  const getStatusColor = (status) => {
+ const getStatusColor = (status: string) => {
+
     switch (status) {
       case 'planning':
         return 'bg-yellow-100 text-yellow-700 border-yellow-200';
@@ -248,7 +249,8 @@ export default function ProjectsPage() {
     }
   };
 
-  const getUrgencyColor = (urgency) => {
+ const getUrgencyColor = (urgency: string) => {
+
     switch (urgency) {
       case 'high':
         return 'bg-red-100 text-red-700';
@@ -261,7 +263,8 @@ export default function ProjectsPage() {
     }
   };
 
-  const getComplexityIcon = (complexity) => {
+const getComplexityIcon = (complexity: string) => {
+
     switch (complexity) {
       case 'simple':
         return 'ri-star-line';
@@ -288,16 +291,19 @@ export default function ProjectsPage() {
   }).sort((a, b) => {
     switch (sortBy) {
       case 'recent':
-        return new Date(b.lastActivity) - new Date(a.lastActivity);
+        return new Date(b.lastActivity).getTime() - new Date(a.lastActivity).getTime();
+
       case 'progress':
         return b.progress - a.progress;
       case 'deadline':
-        return new Date(a.dueDate) - new Date(b.dueDate);
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+
       case 'budget':
         return b.budget - a.budget;
       case 'urgency':
         const urgencyOrder = { 'high': 3, 'medium': 2, 'low': 1 };
-        return urgencyOrder[b.urgency] - urgencyOrder[a.urgency];
+        return (urgencyOrder[b.urgency as keyof typeof urgencyOrder] ?? 0) - (urgencyOrder[a.urgency as keyof typeof urgencyOrder] ?? 0);
+
       case 'satisfaction':
         return b.clientSatisfaction - a.clientSatisfaction;
       default:
@@ -717,7 +723,8 @@ export default function ProjectsPage() {
                         <h2 className="text-2xl font-bold text-[#1F3D3A] mb-2">{selectedProject.title}</h2>
                         <div className="flex items-center space-x-4">
                           <span className={`px-3 py-1 rounded-full text-sm border ${getStatusColor(selectedProject.status)}`}>
-                            {selectedProject.status.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                            {selectedProject.status.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+
                           </span>
                           <span className={`px-2 py-1 rounded-full text-sm ${getUrgencyColor(selectedProject.urgency)}`}>
                             {selectedProject.urgency} priority
@@ -775,7 +782,8 @@ export default function ProjectsPage() {
                         <div className="bg-gray-50 p-6 rounded-xl">
                           <h4 className="font-semibold text-gray-800 mb-3">Technologies Used</h4>
                           <div className="flex flex-wrap gap-2">
-                            {selectedProject.technologies.map((tech, index) => (
+                            {selectedProject.technologies.map((tech: string, index: number) => (
+
                               <span key={index} className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm">
                                 {tech}
                               </span>
@@ -786,7 +794,8 @@ export default function ProjectsPage() {
                         <div className="bg-gray-50 p-6 rounded-xl">
                           <h4 className="font-semibold text-gray-800 mb-3">Project Tags</h4>
                           <div className="flex flex-wrap gap-2">
-                            {selectedProject.tags.map((tag, index) => (
+                            {selectedProject.tags.map((tag: string, index: number) => (
+
                               <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
                                 {tag}
                               </span>
@@ -826,7 +835,8 @@ export default function ProjectsPage() {
                       <div className="bg-gray-50 rounded-xl p-6">
                         <h4 className="font-semibold text-gray-800 mb-4">Team Members</h4>
                         <div className="space-y-3">
-                          {selectedProject.team.map((member, index) => (
+                         {selectedProject.team.map((member: string, index: number) => (
+
                             <div key={index} className="flex items-center space-x-3">
                               <div className="w-10 h-10 bg-[#1F3D3A] rounded-full flex items-center justify-center text-white font-medium">
                                 {member.split(' ')[0][0]}

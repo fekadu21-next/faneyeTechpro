@@ -7,9 +7,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
 export default function DiagnosisPage() {
-  const [activeTab, setActiveTab] = useState('gtm');
+  type DiagnosticKey = 'gtm' | 'innovation' | 'startup';
+const [activeTab, setActiveTab] = useState<DiagnosticKey>('gtm');
+
   const [currentStep, setCurrentStep] = useState(1);
-  const [responses, setResponses] = useState({});
+ const [responses, setResponses] = useState<Record<string, string | string[]>>({});
   const [showResults, setShowResults] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -206,14 +208,16 @@ export default function DiagnosisPage() {
     }
   };
 
-  const handleResponse = (questionId, answer) => {
+  const handleResponse = (questionId: string, answer: any) => {
+
     if (!mounted) return;
     setResponses(prev => ({ ...prev, [questionId]: answer }));
   };
 
   const nextStep = () => {
     if (!mounted) return;
-    if (currentStep < diagnostics[activeTab].questions.length) {
+    if (currentStep < (((diagnostics as any)[activeTab]?.questions?.length) ?? 0)) {
+
       setCurrentStep(currentStep + 1);
     }
   };
@@ -238,12 +242,14 @@ export default function DiagnosisPage() {
   };
 
   const calculateScore = () => {
-    const questions = diagnostics[activeTab].questions;
+    const questions = diagnostics[activeTab as keyof typeof diagnostics].questions;
+
     let totalScore = 0;
     let answeredQuestions = 0;
 
     questions.forEach(question => {
-      const response = responses[question.id];
+     const response = responses[question.id as keyof typeof responses];
+
       if (response) {
         const option = question.options.find(opt => opt.text === response);
         if (option) {
@@ -256,12 +262,25 @@ export default function DiagnosisPage() {
     return answeredQuestions > 0 ? Math.round((totalScore / (answeredQuestions * 4)) * 100) : 0;
   };
 
-  const getScoreLevel = (score) => {
-    if (score >= 80) return { level: 'Excellent', color: 'green', message: 'You\'re well-positioned for success!' };
-    if (score >= 60) return { level: 'Good', color: 'blue', message: 'Strong foundation with room for optimization.' };
-    if (score >= 40) return { level: 'Fair', color: 'yellow', message: 'Some areas need attention and improvement.' };
-    return { level: 'Needs Improvement', color: 'red', message: 'Significant opportunities for enhancement.' };
-  };
+ interface ScoreLevel {
+  level: string;
+  color: string;
+  message: string;
+}
+
+const getScoreLevel = (score: number): ScoreLevel => {
+  if (score >= 80) {
+    return { level: 'Excellent', color: 'green', message: "You're well-positioned for success!" };
+  }
+  if (score >= 60) {
+    return { level: 'Good', color: 'blue', message: 'Strong foundation with room for optimization.' };
+  }
+  if (score >= 40) {
+    return { level: 'Fair', color: 'yellow', message: 'Some areas need attention and improvement.' };
+  }
+  return { level: 'Needs Improvement', color: 'red', message: 'Significant opportunities for enhancement.' };
+};
+
 
   if (!mounted) {
     return (
@@ -278,7 +297,8 @@ export default function DiagnosisPage() {
     );
   }
 
-  const currentQuestion = diagnostics[activeTab].questions[currentStep - 1];
+  const currentQuestion = (diagnostics as Record<string, typeof diagnostics.gtm>)[activeTab].questions[currentStep - 1];
+
   const score = calculateScore();
   const scoreData = getScoreLevel(score);
 
@@ -348,7 +368,8 @@ export default function DiagnosisPage() {
                   {Object.entries(diagnostics).map(([key, diagnostic]) => (
                     <button
                       key={key}
-                      onClick={() => { setActiveTab(key); setCurrentStep(1); setResponses({}); setShowResults(false); }}
+                      onClick={() => { setActiveTab(key as 'gtm' | 'innovation' | 'startup'); setCurrentStep(1); setResponses({}); setShowResults(false); }}
+
                       className={`px-3 sm:px-6 py-2 sm:py-3 rounded-xl transition-all duration-300 whitespace-nowrap cursor-pointer font-medium text-xs sm:text-sm ${activeTab === key ? 'bg-[#1F3D3A] text-white shadow-lg' : 'text-gray-600 hover:text-[#1F3D3A] hover:bg-gray-50'}`}
                     >
                       <span className="block sm:hidden">
@@ -368,15 +389,22 @@ export default function DiagnosisPage() {
               <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl p-4 sm:p-8 lg:p-12">
                 <div className="text-center mb-6 sm:mb-8">
                   <h2 className="text-2xl sm:text-3xl font-bold text-[#1F3D3A] mb-2 sm:mb-3">
-                    {diagnostics[activeTab].title}
-                  </h2>
-                  <p className="text-gray-600 text-base sm:text-lg">{diagnostics[activeTab].description}</p>
+  {(diagnostics as Record<string, { title: string }>)[activeTab].title}
+</h2>
+
+                 <p className="text-gray-600 text-base sm:text-lg">
+  {(diagnostics as Record<string, { description: string }>)[activeTab].description}
+</p>
+
                 </div>
 
                 {/* Progress Bar */}
                 <div className="mb-8 sm:mb-10">
                   <div className="flex flex-col sm:flex-row justify-between text-sm text-gray-500 mb-3 gap-1 sm:gap-0">
-                    <span className="font-medium">Question {currentStep} of {diagnostics[activeTab].questions.length}</span>
+                   <span className="font-medium">
+  Question {currentStep} of {(diagnostics as Record<string, { questions: any[] }>)[activeTab].questions.length}
+</span>
+
                     <span className="font-medium">{Math.round((currentStep / diagnostics[activeTab].questions.length) * 100)}% Complete</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2 sm:h-3">

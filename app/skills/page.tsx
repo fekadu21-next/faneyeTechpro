@@ -9,9 +9,10 @@ import { useState, useEffect } from 'react';
 export default function SkillsPage() {
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProfessional, setSelectedProfessional] = useState(null);
+  const [selectedProfessional, setSelectedProfessional] = useState<any>(null);
   const [showContactModal, setShowContactModal] = useState(false);
-  const [selectedContactPro, setSelectedContactPro] = useState(null);
+  const [selectedContactPro, setSelectedContactPro] = useState<any>(null);
+
   const [sortBy, setSortBy] = useState('rating');
   const [priceRange, setPriceRange] = useState('all');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
@@ -25,46 +26,86 @@ export default function SkillsPage() {
   const [viewMode, setViewMode] = useState('grid');
   const [mounted, setMounted] = useState(false);
   const [showComparisonModal, setShowComparisonModal] = useState(false);
-  const [comparedProfessionals, setComparedProfessionals] = useState([]);
-  const [favorites, setFavorites] = useState([]);
+  const [comparedProfessionals, setComparedProfessionals] = useState<any[]>([]);
+  const [favorites, setFavorites] = useState<any[]>([]);
   const [showProjectPostModal, setShowProjectPostModal] = useState(false);
   const [showSkillsAssessment, setShowSkillsAssessment] = useState(false);
   const [showTeamBuilder, setShowTeamBuilder] = useState(false);
   const [teamBuilderProjects, setTeamBuilderProjects] = useState([]);
   const [aiRecommendations, setAiRecommendations] = useState([]);
   const [showAiModal, setShowAiModal] = useState(false);
-
   const [assessmentStep, setAssessmentStep] = useState(1);
-  const [assessmentData, setAssessmentData] = useState({
-    selectedSkills: [],
-    experienceLevel: '',
-    workPreference: '',
-    availability: '',
-    hourlyRate: '',
-    portfolio: [],
-    certifications: [],
-    languages: [],
-    workingHours: '',
-    bio: '',
-    goals: []
-  });
-  const [assessmentResults, setAssessmentResults] = useState(null);
+const [assessmentData, setAssessmentData] = useState<{
+  selectedSkills: string[];
+  experienceLevel: string;
+  workPreference: string;
+  availability: string;
+  hourlyRate: string;
+  portfolio: string[];
+  certifications: string[];
+  languages: string[];
+  workingHours: string;
+  bio: string;
+  goals: string[]; // 👈 this fixes the "never" issue
+}>({
+  selectedSkills: [],
+  experienceLevel: '',
+  workPreference: '',
+  availability: '',
+  hourlyRate: '',
+  portfolio: [],
+  certifications: [],
+  languages: [],
+  workingHours: '',
+  bio: '',
+  goals: [], // 👈 still the same value
+});
+
+
+  const [assessmentResults, setAssessmentResults] = useState<{
+  skillScore: number;
+  marketReadiness: number;
+  experienceLevel: string;
+  topSkills: string[];
+  recommendations: {
+    type: string;
+    title: string;
+    description: string;
+    action: string;
+  }[];
+  matchingProfessionals: {
+    name: string;
+    expertise: string;
+    rating: number;
+    hourlyRate: number;
+    profileUrl: string;
+  }[]; // Fill in accurate types as needed
+  suggestedHourlyRate: {
+    min: number;
+    max: number;
+    average: number;
+  };
+  nextSteps: string[];
+} | null>(null);
+
   const [isSubmittingAssessment, setIsSubmittingAssessment] = useState(false);
 
   const [teamBuilderStep, setTeamBuilderStep] = useState(1);
   const [teamBuilderData, setTeamBuilderData] = useState({
-    projectType: '',
-    budget: '',
-    timeline: '',
-    teamSize: '',
-    requiredSkills: [],
-    projectDescription: '',
-    industry: '',
-    complexity: '',
-    workStyle: '',
-    communicationPrefs: []
-  });
-  const [recommendedTeams, setRecommendedTeams] = useState([]);
+  projectType: '',
+  budget: '',
+  timeline: '',
+  teamSize: '',
+  requiredSkills: [] as string[], // ✅ Fix: explicitly say it's string[]
+  projectDescription: '',
+  industry: '',
+  complexity: '',
+  workStyle: '',
+  communicationPrefs: [] as string[] // ✅ (optional)
+});
+
+  const [recommendedTeams, setRecommendedTeams] = useState<any[]>([]);
+
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [isGeneratingTeams, setIsGeneratingTeams] = useState(false);
   const [showTeamDetails, setShowTeamDetails] = useState(false);
@@ -396,7 +437,8 @@ export default function SkillsPage() {
     { id: 'remote-work', name: 'Remote Work', description: 'Work remotely with international clients' }
   ];
 
-  const handleSkillToggle = (skill) => {
+  const handleSkillToggle = (skill: string) => {
+
     if (!mounted) return;
     const updatedSkills = assessmentData.selectedSkills.includes(skill)
       ? assessmentData.selectedSkills.filter(s => s !== skill)
@@ -405,7 +447,8 @@ export default function SkillsPage() {
     setAssessmentData(prev => ({ ...prev, selectedSkills: updatedSkills }));
   };
 
-  const handleGoalToggle = (goal) => {
+  const handleGoalToggle = (goal: string) => {
+
     if (!mounted) return;
     const updatedGoals = assessmentData.goals.includes(goal)
       ? assessmentData.goals.filter(g => g !== goal)
@@ -514,7 +557,8 @@ export default function SkillsPage() {
       await new Promise(resolve => setTimeout(resolve, 2000));
 
       const results = generateAssessmentResults();
-      setAssessmentResults(results);
+      setAssessmentResults(results as any);
+
       setAssessmentStep(7);
     } catch (error) {
       console.error('Assessment submission error:', error);
@@ -643,21 +687,26 @@ export default function SkillsPage() {
     };
   };
 
-  const handleTeamBuilderSkillToggle = (skill) => {
-    if (!mounted) return;
-    const updatedSkills = teamBuilderData.requiredSkills.includes(skill)
-      ? teamBuilderData.requiredSkills.filter(s => s !== skill)
-      : [...teamBuilderData.requiredSkills, skill];
+const handleTeamBuilderSkillToggle = (skill: string) => {
+  if (!mounted) return;
 
-    setTeamBuilderData(prev => ({ ...prev, requiredSkills: updatedSkills }));
-  };
+  setTeamBuilderData(prev => {
+    const updatedSkills = prev.requiredSkills.includes(skill)
+      ? prev.requiredSkills.filter(s => s !== skill)
+      : [...prev.requiredSkills, skill];
 
-  const handleCommunicationPrefToggle = (pref) => {
+    return { ...prev, requiredSkills: updatedSkills };
+  });
+};
+
+
+
+ const handleCommunicationPrefToggle = (pref: string) => {
+
     if (!mounted) return;
     const updatedPrefs = teamBuilderData.communicationPrefs.includes(pref)
       ? teamBuilderData.communicationPrefs.filter(p => p !== pref)
       : [...teamBuilderData.communicationPrefs, pref];
-
     setTeamBuilderData(prev => ({ ...prev, communicationPrefs: updatedPrefs }));
   };
 
@@ -842,13 +891,15 @@ export default function SkillsPage() {
       if (sortBy === 'price-high') return b.hourlyRate - a.hourlyRate;
       if (sortBy === 'reviews') return b.reviews - a.reviews;
       if (sortBy === 'projects') return b.projectsCompleted - a.projectsCompleted;
-      if (sortBy === 'recent') return new Date(b.lastOnline) - new Date(a.lastOnline);
+      if (sortBy === 'recent') return new Date(b.lastOnline).getTime() - new Date(a.lastOnline).getTime();
+
       if (sortBy === 'earnings') return b.totalEarnings - a.totalEarnings;
       if (sortBy === 'completion') return b.completionRate - a.completionRate;
       return 0;
     });
 
-  const toggleFavorite = (professionalId) => {
+const toggleFavorite = (professionalId: any) => {
+
     if (!mounted) return;
     const updatedFavorites = favorites.includes(professionalId)
       ? favorites.filter(id => id !== professionalId)
@@ -858,7 +909,8 @@ export default function SkillsPage() {
     localStorage.setItem('inhub-favorites', JSON.stringify(updatedFavorites));
   };
 
-  const addToComparison = (professional) => {
+const addToComparison = (professional: any) => {
+
     if (!mounted) return;
     if (comparedProfessionals.length >= 3) {
       alert('You can only compare up to 3 professionals at once');
@@ -869,7 +921,8 @@ export default function SkillsPage() {
     }
   };
 
-  const removeFromComparison = (professionalId) => {
+  const removeFromComparison = (professionalId: any) => {
+
     if (!mounted) return;
     setComparedProfessionals(comparedProfessionals.filter(p => p.id !== professionalId));
   };
@@ -1520,15 +1573,15 @@ export default function SkillsPage() {
                   </thead>
                   <tbody>
                     {[
-                      { label: 'Hourly Rate', key: 'hourlyRate', format: (val) => `$${val}/hr` },
-                      { label: 'Rating', key: 'rating', format: (val) => `${val} ★` },
-                      { label: 'Reviews', key: 'reviews', format: (val) => `${val} reviews` },
-                      { label: 'Projects Completed', key: 'projectsCompleted', format: (val) => `${val} projects` },
-                      { label: 'Success Rate', key: 'completionRate', format: (val) => `${val}%` },
-                      { label: 'Response Time', key: 'responseTime', format: (val) => val },
-                      { label: 'Experience', key: 'experience', format: (val) => val },
-                      { label: 'Location', key: 'location', format: (val) => val },
-                      { label: 'Availability', key: 'availability', format: (val) => val }
+{ label: 'Hourly Rate', key: 'hourlyRate', format: (val: any) => `$${val}/hr` },
+                      { label: 'Rating', key: 'rating', format: (val:any) => `$${val} ★` },
+                      { label: 'Reviews', key: 'reviews', format: (val:any) => `${val} reviews` },
+                      { label: 'Projects Completed', key: 'projectsCompleted', format: (val:any) => `${val} projects` },
+                      { label: 'Success Rate', key: 'completionRate', format: (val:any) => `$${val}%` },
+                      { label: 'Response Time', key: 'responseTime', format: (val:any) => val },
+                      { label: 'Experience', key: 'experience', format: (val:any)=> val },
+                      { label: 'Location', key: 'location', format:(val:any) => val },
+                      { label: 'Availability', key: 'availability', format: (val:any) => val }
                     ].map((row) => (
                       <tr key={row.key} className="border-b hover:bg-gray-50">
                         <td className="p-4 font-medium text-gray-700">{row.label}</td>
@@ -1544,7 +1597,7 @@ export default function SkillsPage() {
                       {comparedProfessionals.map((pro) => (
                         <td key={pro.id} className="p-4">
                           <div className="flex flex-wrap gap-1 justify-center">
-                            {pro.skills.slice(0, 3).map((skill, index) => (
+                            {pro.skills.slice(0, 3).map((skill :any, index:any) => (
                               <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">
                                 {skill}
                               </span>
@@ -1781,7 +1834,7 @@ export default function SkillsPage() {
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-3">Project Description</label>
                         <textarea
-                          rows="4"
+                          rows={4}
                           value={teamBuilderData.projectDescription}
                           onChange={(e) => setTeamBuilderData((prev) => ({ ...prev, projectDescription: e.target.value }))}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
@@ -1898,7 +1951,7 @@ export default function SkillsPage() {
                         <div className="mb-4">
                           <h5 className="font-semibold text-gray-800 mb-2">Team Members</h5>
                           <div className="flex flex-wrap gap-2">
-                            {team.members.map((member, index) => (
+                            {team.members.map((member:any, index:any) => (
                               <div key={index} className="flex items-center space-x-2 bg-gray-50 p-2 rounded-lg">
                                 <div
                                   className="w-8 h-8 rounded-full bg-gray-200"
@@ -1920,7 +1973,7 @@ export default function SkillsPage() {
                           <div>
                             <h5 className="font-semibold text-gray-800 mb-2">Specialties</h5>
                             <div className="flex flex-wrap gap-1">
-                              {team.specialties.map((specialty, index) => (
+                              {team.specialties.map((specialty:any, index:any) => (
                                 <span key={index} className="px-2 py-1 bg-[#1F3D3A]/10 text-[#1F3D3A] rounded text-xs">
                                   {specialty}
                                 </span>
@@ -1930,7 +1983,7 @@ export default function SkillsPage() {
                           <div>
                             <h5 className="font-semibold text-gray-800 mb-2">Key Strengths</h5>
                             <div className="flex flex-wrap gap-1">
-                              {team.strengths.slice(0, 3).map((strength, index) => (
+                              {team.strengths.slice(0, 3).map((strength:any, index:any) => (
                                 <span key={index} className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs">
                                   {strength}
                                 </span>
@@ -1941,7 +1994,7 @@ export default function SkillsPage() {
                         <div className="mb-4">
                           <h5 className="font-semibold text-gray-800 mb-2">Recent Projects</h5>
                           <ul className="text-sm text-gray-600 space-y-1">
-                            {team.pastProjects.slice(0, 2).map((project, index) => (
+                            {team.pastProjects.slice(0, 2).map((project:any, index:any) => (
                               <li key={index}>• {project}</li>
                             ))}
                           </ul>
@@ -2206,12 +2259,14 @@ export default function SkillsPage() {
                           <div>
                             <div className="flex items-center justify-between mb-2">
                               <span>Competitive Edge</span>
-                              <span className="font-bold">{assessmentResults.competitiveAdvantage}/100</span>
+                              <span className="font-bold">{assessmentResults.skillScore}/100</span>
+
                             </div>
                             <div className="w-full bg-white/20 rounded-full h-2">
                               <div
                                 className="bg-white h-2 rounded-full"
-                                style={{ width: `${assessmentResults.competitiveAdvantage}%` }}
+                                style={{ width: `${assessmentResults.skillScore}%` }}
+
                               ></div>
                             </div>
                           </div>
@@ -2221,7 +2276,8 @@ export default function SkillsPage() {
                         <h4 className="text-lg font-semibold text-blue-800 mb-4">Optimal Rate Range</h4>
                         <div className="text-center">
                           <div className="text-3xl font-bold text-blue-600 mb-2">
-                            ${assessmentResults.suggestedHourlyRate.optimal}
+                            ${(assessmentResults as any).suggestedHourlyRate.optimal}
+
                           </div>
                           <div className="text-sm text-blue-700 mb-3">recommended per hour</div>
                           <div className="text-xs text-blue-600">
@@ -2238,10 +2294,12 @@ export default function SkillsPage() {
                               <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                                 <div
                                   className="bg-green-500 h-2 rounded-full"
-                                  style={{ width: `${assessmentResults.marketAnalysis.demandLevel}%` }}
+                                  style={{ width: `${(assessmentResults as any).marketAnalysis.demandLevel}%` }}
+
                                 ></div>
                               </div>
-                              <span className="text-sm font-medium">{assessmentResults.marketAnalysis.demandLevel}%</span>
+                              <span className="text-sm font-medium">{(assessmentResults as any).marketAnalysis.demandLevel}%</span>
+
                             </div>
                           </div>
                           <div className="flex items-center justify-between">
@@ -2250,10 +2308,12 @@ export default function SkillsPage() {
                               <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                                 <div
                                   className="bg-yellow-500 h-2 rounded-full"
-                                  style={{ width: `${assessmentResults.marketAnalysis.competitionLevel}%` }}
+                                 style={{ width: `${(assessmentResults as any).marketAnalysis.competitionLevel}%` }}
+
                                 ></div>
                               </div>
-                              <span className="text-sm font-medium">{assessmentResults.marketAnalysis.competitionLevel}%</span>
+                              <span className="text-sm font-medium">{(assessmentResults as any).marketAnalysis.competitionLevel}%</span>
+
                             </div>
                           </div>
                           <div className="flex items-center justify-between">
@@ -2262,10 +2322,11 @@ export default function SkillsPage() {
                               <div className="w-16 bg-gray-200 rounded-full h-2 mr-2">
                                 <div
                                   className="bg-blue-500 h-2 rounded-full"
-                                  style={{ width: `${assessmentResults.marketAnalysis.growthPotential}%` }}
+                                 style={{ width: `${(assessmentResults as any).marketAnalysis.growthPotential}%` }}
+
                                 ></div>
                               </div>
-                              <span className="text-sm font-medium">{assessmentResults.marketAnalysis.growthPotential}%</span>
+<span className="text-sm font-medium">{(assessmentResults as any).marketAnalysis.growthPotential}%</span>
                             </div>
                           </div>
                         </div>
@@ -2288,7 +2349,7 @@ export default function SkillsPage() {
                       <div className="bg-white border border-gray-200 p-6 rounded-xl">
                         <h4 className="text-lg font-semibold text-gray-800 mb-4">Personalized Career Insights</h4>
                         <div className="space-y-4">
-                          {assessmentResults.personalizedInsights.map((insight, index) => (
+{(assessmentResults as any).personalizedInsights.map((insight: any, index: number) => (
                             <div key={index} className={`border-l-4 p-4 rounded-r-lg ${insight.type === 'strength' ? 'border-green-500 bg-green-50' : insight.type === 'opportunity' ? 'border-blue-500 bg-blue-50' : 'border-purple-500 bg-purple-50'}`}>
                               <div className="flex items-start justify-between mb-2">
                                 <h5
@@ -2317,11 +2378,12 @@ export default function SkillsPage() {
                           ))}
                         </div>
                       </div>
-                      {assessmentResults.careerPathways.length > 0 && (
+                      {(assessmentResults as any).careerPathways.length > 0 && (
+
                         <div className="bg-white border border-gray-200 p-6 rounded-xl">
                           <h4 className="text-lg font-semibold text-gray-800 mb-4">Career Pathway Recommendations</h4>
                           <div className="space-y-4">
-                            {assessmentResults.careerPathways.map((pathway, index) => (
+                            {(assessmentResults as any).careerPathways.map((pathway: any, index: number) => (
                               <div key={index} className="border border-gray-200 p-4 rounded-lg">
                                 <div className="flex items-start justify-between mb-2">
                                   <h5 className="font-semibold text-gray-800">{pathway.title}</h5>
@@ -2333,7 +2395,8 @@ export default function SkillsPage() {
                                 <div>
                                   <p className="text-xs font-medium text-gray-700 mb-2">Next Steps:</p>
                                   <ul className="text-xs text-gray-600 space-y-1">
-                                    {pathway.nextSteps.map((step, stepIndex) => (
+                                    {(pathway as any).nextSteps.map((step: any, stepIndex: number) => (
+
                                       <li key={stepIndex}>• {step}</li>
                                     ))}
                                   </ul>
@@ -2363,19 +2426,21 @@ export default function SkillsPage() {
                           <h4 className="text-lg font-semibold text-gray-800 mb-4">Professionals with Similar Skills</h4>
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {assessmentResults.matchingProfessionals.map((pro) => (
-                              <div key={pro.id} className="border border-gray-200 rounded-lg p-4">
+                              <div key={(pro as any).id} className="border border-gray-200 rounded-lg p-4">
                                 <div className="flex items-center mb-3">
                                   <div
                                     className="w-12 h-12 rounded-full bg-gray-200 mr-3"
-                                    style={{
-                                      backgroundImage: `url('${pro.image}')`,
-                                      backgroundSize: 'cover',
-                                      backgroundPosition: 'center'
-                                    }}
+                                   style={{
+                    backgroundImage: `url('${(pro as any).image ?? pro.profileUrl}')`
+                    ,backgroundSize: 'cover',
+                    backgroundPosition: 'center'
+                  }}
+
                                   ></div>
                                   <div>
-                                    <div className="font-medium text-gray-800 text-sm">{pro.name}</div>
-                                    <div className="text-xs text-gray-600">{pro.title}</div>
+                                    <div className="font-medium text-gray-800 text-sm">{(pro as any).name}</div>
+                                    <div className="text-xs text-gray-600">{(pro as any).title}</div>
+
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between mb-2">
@@ -2386,7 +2451,7 @@ export default function SkillsPage() {
                                   <span className="text-sm font-bold text-[#1F3D3A]">${pro.hourlyRate}/hr</span>
                                 </div>
                                 <div className="text-xs text-gray-500">
-                                  {pro.projectsCompleted} projects • {pro.completionRate}% success
+                                  {(pro as any).projectsCompleted} projects • {(pro as any).completionRate}% success
                                 </div>
                               </div>
                             ))}

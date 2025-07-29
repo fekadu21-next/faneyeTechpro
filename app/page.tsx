@@ -113,7 +113,8 @@ export default function Home() {
     }, 800);
   };
 
-  const goToSlide = (index) => {
+  const goToSlide = (index: number) => {
+
     if (index !== currentSlide) {
       setSlideDirection(index > currentSlide ? 'right' : 'left');
       setIsTransitioning(true);
@@ -353,7 +354,8 @@ export default function Home() {
     }
   ];
 
-  const handleGetStartedClick = (serviceIndex) => {
+ const handleGetStartedClick = (serviceIndex: number) => {
+
     setSelectedServiceCategory(servicesData[serviceIndex].category);
     setShowGetStartedModal(true);
     setCurrentModalStep(1);

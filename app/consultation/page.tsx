@@ -134,7 +134,8 @@ export default function ConsultationBookingPage() {
     '$50K - $100K', '$100K+', 'To be discussed'
   ];
 
-  const updateFormData = (field, value) => {
+  const updateFormData = (field: string, value: any) => {
+
     if (!mounted) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -164,13 +165,14 @@ export default function ConsultationBookingPage() {
     return dates;
   };
 
-  const getAvailableTimeSlots = (date) => {
+  const getAvailableTimeSlots = (date: Date) => {
     // Simulate different availability for different dates
     const baseSlots = timeSlots.filter(() => Math.random() > 0.4);
     return baseSlots;
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
     if (!mounted) return;
 
@@ -357,7 +359,10 @@ export default function ConsultationBookingPage() {
 
   const selectedConsultation = consultationTypes.find(c => c.id === consultationType);
   const availableDates = generateAvailableDates();
-  const availableTimeSlots = selectedDate ? getAvailableTimeSlots(selectedDate) : [];
+const availableTimeSlots = (selectedDate ? getAvailableTimeSlots(new Date(selectedDate)) : []) as string[];
+
+
+
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -790,12 +795,12 @@ export default function ConsultationBookingPage() {
                           <textarea
                             name="currentChallenges"
                             required
-                            rows="4"
+                            rows={4}
                             value={formData.currentChallenges}
                             onChange={(e) => updateFormData('currentChallenges', e.target.value)}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                             placeholder="Describe the main challenges your business is facing..."
-                            maxLength="500"
+                            maxLength={500}
                           />
                           <div className="text-sm text-gray-500 mt-1">
                             {formData.currentChallenges.length}/500 characters
@@ -806,12 +811,12 @@ export default function ConsultationBookingPage() {
                           <textarea
                             name="specificGoals"
                             required
-                            rows="4"
+                            rows={4}
                             value={formData.specificGoals}
                             onChange={(e) => updateFormData('specificGoals', e.target.value)}
                             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                             placeholder="What specific goals do you want to achieve with this consultation?"
-                            maxLength="500"
+                            maxLength={500}
                           />
                           <div className="text-sm text-gray-500 mt-1">
                             {formData.specificGoals.length}/500 characters
@@ -888,12 +893,12 @@ export default function ConsultationBookingPage() {
                         <label className="block text-sm font-medium text-gray-700 mb-2">Additional Notes</label>
                         <textarea
                           name="additionalNotes"
-                          rows="3"
+                          rows={3}
                           value={formData.additionalNotes}
                           onChange={(e) => updateFormData('additionalNotes', e.target.value)}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                           placeholder="Any specific topics you'd like to discuss or additional information..."
-                          maxLength="300"
+                          maxLength={300}
                         />
                         <div className="text-sm text-gray-500 mt-1">
                           {formData.additionalNotes.length}/300 characters

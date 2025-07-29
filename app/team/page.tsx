@@ -4,7 +4,8 @@
 import { useState } from 'react';
 
 export default function TeamPage() {
-  const [selectedMember, setSelectedMember] = useState(null);
+ const [selectedMember, setSelectedMember] = useState<any>(null);
+
   const [activeTab, setActiveTab] = useState('all');
 
   const teamMembers = [
@@ -161,7 +162,8 @@ export default function TeamPage() {
                 {dept === 'all' ? 'All Team' : dept}
                 {dept !== 'all' && (
                   <span className="ml-2 text-sm">
-                    ({departmentStats[dept]?.count || 0})
+                    ({ (departmentStats as any)[dept]?.count || 0 })
+
                   </span>
                 )}
               </button>
@@ -188,7 +190,8 @@ export default function TeamPage() {
 
                   <div className="space-y-3 mb-6">
                     <div className="flex items-center justify-between">
-                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${departmentStats[member.department]?.color}`}>
+                      <span className={`px-3 py-1 rounded-full text-sm font-medium ${(departmentStats as any)[member.department]?.color}
+`}>
                         {member.department}
                       </span>
                       <div className="flex items-center">
@@ -310,7 +313,7 @@ export default function TeamPage() {
                     <div>
                       <h4 className="font-semibold text-gray-900 mb-3">Skills & Expertise</h4>
                       <div className="flex flex-wrap gap-2">
-                        {selectedMember.skills.map((skill, index) => (
+                       {selectedMember?.skills?.map((skill: string, index: number) => (
                           <span key={index} className="bg-[#1F3D3A]/10 text-[#1F3D3A] px-3 py-1 rounded-full text-sm font-medium">
                             {skill}
                           </span>

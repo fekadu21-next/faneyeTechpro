@@ -9,7 +9,14 @@ import { useState, useEffect } from 'react';
 export default function CaseStudiesPage() {
   const [activeFilter, setActiveFilter] = useState('all');
   const [mounted, setMounted] = useState(false);
-  const [selectedCase, setSelectedCase] = useState(null);
+  const [selectedCase, setSelectedCase] = useState<{
+  title: string;
+  image?: string;
+  challenge?: string;
+  solution?: string;
+  results?: string[]; // <-- add this line
+} | null>(null);
+
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
@@ -359,9 +366,9 @@ export default function CaseStudiesPage() {
     .sort((a, b) => {
       switch (sortBy) {
         case 'recent':
-          return new Date(b.date) - new Date(a.date);
+         return new Date(b.date).getTime() - new Date(a.date).getTime();
         case 'oldest':
-          return new Date(a.date) - new Date(b.date);
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
         case 'alphabetical':
           return a.title.localeCompare(b.title);
         case 'industry':
@@ -373,7 +380,7 @@ export default function CaseStudiesPage() {
 
   const featuredCases = caseStudies.filter(study => study.featured);
 
-  const handleCaseClick = (caseStudy) => {
+  const handleCaseClick = (caseStudy: any) => {
     if (!mounted) return;
     setSelectedCase(caseStudy);
     setShowModal(true);
@@ -385,22 +392,23 @@ export default function CaseStudiesPage() {
     setSelectedCase(null);
   };
 
-  const handleSearchChange = (e) => {
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!mounted) return;
     setSearchTerm(e.target.value);
   };
 
-  const handleSortChange = (e) => {
+  const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     if (!mounted) return;
     setSortBy(e.target.value);
   };
 
-  const handleFilterChange = (filter) => {
+  const handleFilterChange = (filter: string) => {
+
     if (!mounted) return;
     setActiveFilter(filter);
   };
 
-  const handleViewModeChange = (mode) => {
+  const handleViewModeChange = (mode: string) => {
     if (!mounted) return;
     setViewMode(mode);
   };
@@ -938,7 +946,9 @@ export default function CaseStudiesPage() {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={closeModal}>
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-[#1F3D3A]">{selectedCase.title}</h2>
+              <h2 className="text-2xl font-bold text-[#1F3D3A]">{selectedCase?.title ?? ''}</h2>
+
+
               <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full cursor-pointer">
                 <i className="ri-close-line text-xl"></i>
               </button>
@@ -969,7 +979,7 @@ export default function CaseStudiesPage() {
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold text-[#1F3D3A] mb-3">Results</h3>
                     <ul className="space-y-2">
-                      {selectedCase.results.map((result, index) => (
+                      {selectedCase?.results?.map((result, index) => (
                         <li key={index} className="flex items-center text-gray-700">
                           <i className="ri-check-line text-green-500 mr-2"></i>
                           {result}
@@ -985,23 +995,26 @@ export default function CaseStudiesPage() {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Industry:</span>
-                        <span className="font-medium">{selectedCase.industry}</span>
+                        <span className="font-medium">{(selectedCase as any)?.industry ?? ''}</span>
+
+
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Duration:</span>
-                        <span className="font-medium">{selectedCase.duration}</span>
+                        <span className="font-medium">{(selectedCase as any)?.duration ?? ''}</span>
+
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Team Size:</span>
-                        <span className="font-medium">{selectedCase.teamSize}</span>
+                        <span className="font-medium">{(selectedCase as any)?.teamSize}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Investment:</span>
-                        <span className="font-medium">{selectedCase.budget}</span>
+                        <span className="font-medium">{(selectedCase as any).budget}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Complexity:</span>
-                        <span className={`font-medium ${selectedCase.complexity === 'Very High' ? 'text-red-600' : selectedCase.complexity === 'High' ? 'text-orange-600' : 'text-green-600'}`}>{selectedCase.complexity}</span>
+                        <span className={`font-medium ${(selectedCase as any).complexity === 'Very High' ? 'text-red-600' : (selectedCase as any).complexity === 'High' ? 'text-orange-600' : 'text-green-600'}`}>{(selectedCase as any).complexity}</span>
                       </div>
                     </div>
                   </div>
@@ -1009,7 +1022,8 @@ export default function CaseStudiesPage() {
                   <div className="bg-gray-50 p-4 rounded-xl mb-6">
                     <h3 className="text-lg font-semibold text-[#1F3D3A] mb-4">Key Metrics</h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {selectedCase.kpis.map((kpi, index) => (
+                     {(selectedCase as any)?.kpis?.map((kpi: any, index: number) => (
+
                         <div key={index} className="text-center p-3 bg-white rounded-lg">
                           <div className="flex items-center justify-center gap-1 mb-1">
                             <span className="font-bold text-[#1F3D3A]">{kpi.value}</span>
@@ -1021,11 +1035,13 @@ export default function CaseStudiesPage() {
                     </div>
                   </div>
 
-                  {selectedCase.downloadables && (
+                  {(selectedCase as any)?.downloadables && (
                     <div className="bg-gray-50 p-4 rounded-xl">
                       <h3 className="text-lg font-semibold text-[#1F3D3A] mb-4">Resources</h3>
                       <div className="space-y-2">
-                        {selectedCase.downloadables.map((download, index) => (
+                       {(selectedCase as { downloadables?: any[] } | null)?.downloadables?.map((download, index) => (
+
+
                           <button key={index} className="w-full flex items-center justify-between p-3 bg-white rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
                             <div className="flex items-center gap-3">
                               <i className="ri-file-download-line text-[#1F3D3A]"></i>
@@ -1042,11 +1058,11 @@ export default function CaseStudiesPage() {
 
               <div className="bg-gray-50 p-6 rounded-xl">
                 <h3 className="text-lg font-semibold text-[#1F3D3A] mb-4">Client Testimonial</h3>
-                <p className="text-gray-700 italic mb-4">{selectedCase.testimonial}</p>
+                <p className="text-gray-700 italic mb-4">{(selectedCase as any)?.testimonial}</p>
                 <div className="flex items-center">
                   <div>
-                    <div className="font-semibold text-[#1F3D3A]">{selectedCase.clientName}</div>
-                    <div className="text-gray-600 text-sm">{selectedCase.clientRole}</div>
+                    <div className="font-semibold text-[#1F3D3A]">{(selectedCase as any)?.clientName}</div>
+                    <div className="text-gray-600 text-sm">{(selectedCase as any)?.clientRole}</div>
                   </div>
                 </div>
               </div>

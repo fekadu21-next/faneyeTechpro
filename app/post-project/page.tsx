@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 export default function PostProjectPage() {
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{ skills: string[]; [key: string]: any }>({
     projectTitle: '',
     projectType: '',
     category: '',
@@ -66,19 +66,22 @@ export default function PostProjectPage() {
     other: ['Research', 'Translation', 'Virtual Assistant', 'Customer Service', 'Data Entry']
   };
 
-  const updateFormData = (field, value) => {
+  const updateFormData = (field: string, value: any) => {
+
     if (!mounted) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const addSkill = (skill) => {
+ const addSkill = (skill: string) => {
+
     if (!mounted) return;
     if (!formData.skills.includes(skill)) {
       updateFormData('skills', [...formData.skills, skill]);
     }
   };
 
-  const removeSkill = (skill) => {
+  const removeSkill = (skill: string) => {
+
     if (!mounted) return;
     updateFormData('skills', formData.skills.filter(s => s !== skill));
   };
@@ -96,29 +99,43 @@ export default function PostProjectPage() {
     updateFormData('milestones', [...formData.milestones, newMilestone]);
   };
 
-  const updateMilestone = (id, field, value) => {
+  const updateMilestone = (id: string | number, field: string, value: any) => {
+
     if (!mounted) return;
-    const updated = formData.milestones.map(m => m.id === id ? { ...m, [field]: value } : m);
+    const updated = formData.milestones.map((m: any) =>
+  m.id === id ? { ...m, [field]: value } : m
+);
+
     updateFormData('milestones', updated);
   };
 
-  const removeMilestone = (id) => {
-    if (!mounted) return;
-    updateFormData('milestones', formData.milestones.filter(m => m.id !== id));
-  };
+  const removeMilestone = (id: string | number) => {
 
-  const handleFileUpload = (files) => {
     if (!mounted) return;
-    const fileArray = Array.from(files).map(file => ({ id: Date.now() + Math.random(), name: file.name, size: file.size, type: file.type }));
-    updateFormData('attachments', [...formData.attachments, ...fileArray]);
+    updateFormData('milestones', formData.milestones.filter((m: { id: string | number }) => m.id !== id));
   };
-
-  const removeAttachment = (id) => {
     if (!mounted) return;
-    updateFormData('attachments', formData.attachments.filter(f => f.id !== id));
-  };
+const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fileArray = e.target.files ? Array.from(e.target.files).map((file: File) => ({
+    id: Date.now() + Math.random(),
+    name: file.name,
+    size: file.size,
+    type: file.type,
+  })) : [];
 
-  const handleDrag = (e) => {
+  updateFormData('attachments', [...formData.attachments, ...fileArray]);
+};
+
+  const removeAttachment = (id: number) => {
+  if (!mounted) return;
+  updateFormData(
+    'attachments',
+    formData.attachments.filter((f: { id: number }) => f.id !== id)
+  );
+};
+
+  const handleDrag = (e: React.DragEvent<HTMLDivElement>) => {
+
     e.preventDefault();
     e.stopPropagation();
     if (e.type === "dragenter" || e.type === "dragover") {
@@ -127,17 +144,17 @@ export default function PostProjectPage() {
       setDragActive(false);
     }
   };
-
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files);
+      handleFileUpload({ target: { files: e.dataTransfer.files } } as React.ChangeEvent<HTMLInputElement>);
+
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!mounted) return;
 
@@ -376,12 +393,12 @@ export default function PostProjectPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Project Description *</label>
                       <textarea
                         required
-                        rows="6"
+                        rows={6}
                         value={formData.description}
                         onChange={(e) => updateFormData('description', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Describe your project in detail. Include objectives, expected deliverables, target audience, and any specific requirements..."
-                        maxLength="2000"
+                        maxLength={2000}
                       ></textarea>
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.description.length}/2000 characters
@@ -418,7 +435,8 @@ export default function PostProjectPage() {
                         <div className="mb-4">
                           <div className="text-sm text-gray-600 mb-2">Suggested skills for {categories.find(c => c.id === formData.category)?.name}:</div>
                           <div className="flex flex-wrap gap-2">
-                            {skillSuggestions[formData.category]?.map((skill) => (
+                            {skillSuggestions[formData.category as keyof typeof skillSuggestions]?.map((skill) => (
+
                               <button
                                 key={skill}
                                 type="button"
@@ -463,10 +481,10 @@ export default function PostProjectPage() {
                         onKeyPress={(e) => {
                           if (e.key === 'Enter') {
                             e.preventDefault();
-                            const skill = e.target.value.trim();
+                            const skill =  (e.target as HTMLInputElement).value = ''.trim();
                             if (skill) {
                               addSkill(skill);
-                              e.target.value = '';
+                               (e.target as HTMLInputElement).value = '';
                             }
                           }
                         }}
@@ -580,12 +598,12 @@ export default function PostProjectPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Additional Requirements</label>
                       <textarea
-                        rows="4"
+                        rows={4}
                         value={formData.additionalRequirements}
                         onChange={(e) => updateFormData('additionalRequirements', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Any specific requirements, preferences, industry experience, certifications, or additional information..."
-                        maxLength="1000"
+                        maxLength={1000}
                       ></textarea>
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.additionalRequirements.length}/1000 characters
@@ -645,7 +663,7 @@ export default function PostProjectPage() {
                         </div>
                       ) : (
                         <div className="space-y-4">
-                          {formData.milestones.map((milestone, index) => (
+                          {formData.milestones.map((milestone: any, index: number) => (
                             <div key={milestone.id} className="border border-gray-200 rounded-lg p-4">
                               <div className="flex items-center justify-between mb-4">
                                 <h4 className="font-medium text-gray-800">Milestone {index + 1}</h4>
@@ -685,7 +703,7 @@ export default function PostProjectPage() {
                               <div className="mt-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
                                 <textarea
-                                  rows="2"
+                                  rows={2}
                                   value={milestone.description}
                                   onChange={(e) => updateMilestone(milestone.id, 'description', e.target.value)}
                                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
@@ -732,7 +750,8 @@ export default function PostProjectPage() {
                         <input
                           type="file"
                           multiple
-                          onChange={(e) => handleFileUpload(e.target.files)}
+                          onChange={handleFileUpload}
+
                           className="hidden"
                           id="file-upload"
                           accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif,.zip,.rar"
@@ -752,7 +771,7 @@ export default function PostProjectPage() {
                         <div className="mt-6">
                           <h4 className="font-medium text-gray-800 mb-3">Uploaded Files</h4>
                           <div className="space-y-2">
-                            {formData.attachments.map((file) => (
+                            {(formData.attachments as any[]).map((file: any) => (
                               <div key={file.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                                 <div className="flex items-center">
                                   <i className="ri-file-text-line text-[#1F3D3A] mr-3"></i>

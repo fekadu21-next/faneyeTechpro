@@ -15,12 +15,14 @@ export default function AnalyticsPage() {
     setMounted(true);
   }, []);
 
-  const handleTimeRangeChange = (value) => {
+ const handleTimeRangeChange = (value: any) => {
+
     if (!mounted) return;
     setTimeRange(value);
   };
 
-  const handleMetricChange = (metric) => {
+ const handleMetricChange = (metric: any) => {
+
     if (!mounted) return;
     setSelectedMetric(metric);
   };
@@ -224,14 +226,16 @@ export default function AnalyticsPage() {
             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
               <h3 className="text-xl font-bold text-gray-900 mb-6">Projects by Category</h3>
               <div className="h-80">
+              
                 <ResponsiveContainer width="100%" height="100%">
+
                   <PieChart>
                     <Pie
                       data={projectsByCategory}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"

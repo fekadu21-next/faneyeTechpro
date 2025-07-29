@@ -655,7 +655,7 @@ export default function SkillOwnerDashboard() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
                   <textarea
-                    rows="4"
+                    rows={4}
                     value="Passionate full-stack developer with expertise in modern web technologies. Specialized in building scalable applications for Ethiopian businesses."
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                   ></textarea>

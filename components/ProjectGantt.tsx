@@ -154,7 +154,8 @@ export default function ProjectGantt({ projectId }: { projectId: number }) {
       'Testing': 'bg-orange-500',
       'Deployment': 'bg-red-500'
     };
-    return colors[category] || 'bg-gray-500';
+    return colors[category as keyof typeof colors] || 'bg-gray-500';
+
   };
 
   const isTaskOverdue = (task: GanttTask) => {

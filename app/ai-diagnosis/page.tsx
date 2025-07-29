@@ -5,6 +5,29 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
+type RecommendedService = {
+  name: string;
+  matchScore: number;
+  priority: string;
+  description: string;
+  benefits: string[];
+  price: string;
+  duration: string;
+};
+type ActionPlanItem = {
+  phase: string;
+  actions: string[];
+};
+
+type DiagnosticData = {
+  overallScore: number;
+  categoryScores: Record<string, number>;
+  recommendedServices: RecommendedService[];
+  frameworks: string[];
+  problemsIdentified: string[];
+  opportunityAreas: string[];
+  actionPlan: ActionPlanItem[];
+};
 
 export default function AIDiagnosisPage() {
   const [mounted, setMounted] = useState(false);
@@ -13,9 +36,22 @@ export default function AIDiagnosisPage() {
 
   const [showResults, setShowResults] = useState(false);
   const [analysisComplete, setAnalysisComplete] = useState(false);
-  const [recommendedServices, setRecommendedServices] = useState([]);
+type RecommendedService = {
+  name: string;
+  matchScore: number;
+  priority: string;
+  description: string;
+  benefits: string[];
+  price: string;
+  duration: string;
+};
+
+const [recommendedServices, setRecommendedServices] = useState<RecommendedService[]>([]);
+
+
   const [businessScore, setBusinessScore] = useState(0);
-  const [diagnosticData, setDiagnosticData] = useState(null);
+  const [diagnosticData, setDiagnosticData] = useState<DiagnosticData | null>(null);
+
 
   const aiQuestions = [
     {
@@ -222,7 +258,6 @@ export default function AIDiagnosisPage() {
       duration: '2-3 weeks'
     }
   };
-
   const businessFrameworks = {
     grow: {
       title: 'Growth Framework',
@@ -258,6 +293,7 @@ export default function AIDiagnosisPage() {
       areas: [
         'Market repositioning',
         'Business model innovation',
+        
         'Digital transformation',
         'New market exploration',
         'Product line restructuring',
@@ -340,15 +376,38 @@ const handleResponse = (questionId: string | number, answer: string) => {
 
   const performAIAnalysis = () => {
     // AI Analysis Logic
-    const analysisResults = {
-      overallScore: 0,
-      categoryScores: {},
-      recommendedServices: [],
-      frameworks: [],
-      problemsIdentified: [],
-      opportunityAreas: [],
-      actionPlan: []
-    };
+    type RecommendedService = {
+  name: string;
+  matchScore: number;
+  priority: string;
+  description: string;
+  benefits: string[];
+  price: string;
+  duration: string;
+};
+type ActionPlanItem = {
+  phase: string;
+  actions: string[];
+};
+
+    const analysisResults: {
+  overallScore: number;
+  categoryScores: Record<string, number>; // ✅ fix here
+  recommendedServices: RecommendedService[];
+  frameworks: string[];
+  problemsIdentified: string[];
+  opportunityAreas: string[];
+   actionPlan: ActionPlanItem[];
+} = {
+  overallScore: 0,
+  categoryScores: {}, // now properly typed
+  recommendedServices: [],
+  frameworks: [],
+  problemsIdentified: [],
+  opportunityAreas: [],
+  actionPlan: [],
+};
+
 
     // Calculate category scores
     const categories = ['business_maturity', 'financial_health', 'market_presence', 'technology_maturity'];
@@ -381,14 +440,17 @@ const handleResponse = (questionId: string | number, answer: string) => {
     analysisResults.overallScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
 
     // Determine recommended services
-    const userTriggers = [];
-    Object.entries(responses).forEach(([questionId, answer]) => {
-      if (Array.isArray(answer)) {
-        userTriggers.push(...answer);
-      } else {
-        userTriggers.push(answer);
-      }
-    });
+// Determine recommended services
+const userTriggers: string[] = [];
+
+Object.entries(responses).forEach(([questionId, answer]) => {
+  if (Array.isArray(answer)) {
+    userTriggers.push(...answer);
+  } else {
+    userTriggers.push(answer);
+  }
+});
+
 
     Object.entries(serviceRecommendations).forEach(([service, config]) => {
       const matchCount = config.triggers.filter(trigger => userTriggers.includes(trigger)).length;
@@ -430,7 +492,6 @@ const handleResponse = (questionId: string | number, answer: string) => {
         'Digital transformation benefits'
       ];
     }
-
     if (analysisResults.overallScore >= 80) {
       analysisResults.opportunityAreas = [
         'Strategic scaling opportunities',
@@ -439,7 +500,6 @@ const handleResponse = (questionId: string | number, answer: string) => {
         'Partnership and acquisition potential'
       ];
     }
-
     // Recommend frameworks
     if (analysisResults.overallScore < 50) {
       analysisResults.frameworks = ['pivot', 'drop'];
@@ -448,14 +508,24 @@ const handleResponse = (questionId: string | number, answer: string) => {
     } else {
       analysisResults.frameworks = ['grow', 'maintain'];
     }
-
     // Generate action plan
     analysisResults.actionPlan = generateActionPlan(analysisResults);
 
     return analysisResults;
   };
 
-  const generateActionPlan = (analysis) => {
+  type AnalysisResult = {
+  overallScore: number;
+  categoryScores: Record<string, number>;
+  recommendedServices: RecommendedService[];
+  frameworks: string[];
+  problemsIdentified: string[];
+  opportunityAreas: string[];
+  actionPlan: ActionPlanItem[]; // Or string[] if still using plain strings
+};
+
+const generateActionPlan = (analysis: AnalysisResult) => {
+
     const plan = [];
     
     // Immediate actions (0-30 days)
@@ -619,7 +689,7 @@ const handleResponse = (questionId: string | number, answer: string) => {
                             ? (responses[currentQuestion.id] || []).includes(option.value)
                               ? 'border-[#1F3D3A] bg-[#1F3D3A]/5'
                               : 'border-gray-200 hover:bg-gray-50'
-                            : responses[currentQuestion.id] === option.value
+                            :(responses[currentQuestion.id] as any) === option.value
                               ? 'border-[#1F3D3A] bg-[#1F3D3A]/5'
                               : 'border-gray-200 hover:bg-gray-50'
                         }`}
@@ -632,7 +702,7 @@ const handleResponse = (questionId: string | number, answer: string) => {
                           checked={
                             currentQuestion.type === 'multiple'
                               ? (responses[currentQuestion.id] || []).includes(option.value)
-                              : responses[currentQuestion.id] === option.value
+                              : (responses[currentQuestion.id] as any) === option.value
                           }
                           className="mr-4 w-5 h-5 text-[#1F3D3A] focus:ring-[#1F3D3A] flex-shrink-0"
                         />
@@ -758,7 +828,8 @@ const handleResponse = (questionId: string | number, answer: string) => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    {Object.entries(diagnosticData.categoryScores).map(([category, score]) => (
+                   {Object.entries(diagnosticData?.categoryScores ?? {}).map(([category, score]) => (
+
                       <div key={category} className="bg-gray-50 p-6 rounded-xl">
                         <h3 className="font-semibold text-[#1F3D3A] mb-3 capitalize">
                           {category.replace('_', ' ')}
@@ -832,8 +903,10 @@ const handleResponse = (questionId: string | number, answer: string) => {
                     Strategic Frameworks
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {diagnosticData.frameworks.map((frameworkKey, index) => {
-                      const framework = businessFrameworks[frameworkKey];
+                    {(diagnosticData?.frameworks ?? []).map((frameworkKey, index) => {
+
+                      const framework = businessFrameworks[frameworkKey as keyof typeof businessFrameworks];
+
                       return (
                         <div key={index} className="border-2 border-gray-200 rounded-xl p-6 hover:border-[#1F3D3A] transition-colors">
                           <h3 className="text-xl font-bold text-[#1F3D3A] mb-3">{framework.title}</h3>
@@ -870,14 +943,14 @@ const handleResponse = (questionId: string | number, answer: string) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {diagnosticData.problemsIdentified.length > 0 && (
+                  {(diagnosticData?.problemsIdentified ?? []).length > 0 && (
                     <div className="bg-white rounded-3xl shadow-xl p-8">
                       <h2 className="text-xl font-bold text-red-600 mb-6 flex items-center">
                         <i className="ri-error-warning-line mr-3"></i>
                         Problems Identified
                       </h2>
                       <ul className="space-y-3">
-                        {diagnosticData.problemsIdentified.map((problem, index) => (
+                        {(diagnosticData?.problemsIdentified ?? []).map((problem, index) => (
                           <li key={index} className="flex items-start">
                             <i className="ri-close-circle-line text-red-500 mr-3 mt-0.5 flex-shrink-0"></i>
                             <span className="text-gray-700">{problem}</span>
@@ -887,14 +960,16 @@ const handleResponse = (questionId: string | number, answer: string) => {
                     </div>
                   )}
                   
-                  {diagnosticData.opportunityAreas.length > 0 && (
+                 {(diagnosticData?.opportunityAreas ?? []).length > 0 && (
+
                     <div className="bg-white rounded-3xl shadow-xl p-8">
                       <h2 className="text-xl font-bold text-green-600 mb-6 flex items-center">
                         <i className="ri-lightbulb-line mr-3"></i>
                         Opportunities
                       </h2>
                       <ul className="space-y-3">
-                        {diagnosticData.opportunityAreas.map((opportunity, index) => (
+                  {(diagnosticData?.opportunityAreas ?? []).map((opportunity, index) => (
+
                           <li key={index} className="flex items-start">
                             <i className="ri-check-circle-line text-green-500 mr-3 mt-0.5 flex-shrink-0"></i>
                             <span className="text-gray-700">{opportunity}</span>
@@ -911,7 +986,8 @@ const handleResponse = (questionId: string | number, answer: string) => {
                     Strategic Action Plan
                   </h2>
                   <div className="space-y-6">
-                    {diagnosticData.actionPlan.map((phase, index) => (
+                    {(diagnosticData?.actionPlan ?? []).map((phase, index) => (
+
                       <div key={index} className="border-l-4 border-[#1F3D3A] pl-6">
                         <h3 className="text-lg font-semibold text-[#1F3D3A] mb-3">{phase.phase}</h3>
                         <ul className="space-y-2">

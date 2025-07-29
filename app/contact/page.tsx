@@ -44,7 +44,8 @@ export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [expandedFaq, setExpandedFaq] = useState(null);
+  const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
+
 
   useEffect(() => {
     setMounted(true);
@@ -186,12 +187,12 @@ export default function ContactPage() {
     'Referral Program'
   ];
 
-  const updateFormData = (field, value) => {
+  const updateFormData = (field: string, value: string | boolean) => {
     if (!mounted) return;
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!mounted) return;
 
@@ -654,12 +655,12 @@ export default function ContactPage() {
                       <textarea
                         name="message"
                         required
-                        rows="6"
+                        rows={6}
                         value={formData.message}
                         onChange={(e) => updateFormData('message', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Tell us more about your inquiry..."
-                        maxLength="1000"
+                        maxLength={1000}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.message.length}/1000 characters
@@ -814,12 +815,12 @@ export default function ContactPage() {
                       <textarea
                         name="projectDescription"
                         required
-                        rows="5"
+                        rows={5}
                         value={formData.projectDescription}
                         onChange={(e) => updateFormData('projectDescription', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Please describe your project, goals, and challenges..."
-                        maxLength="1000"
+                        maxLength={1000}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.projectDescription.length}/1000 characters
@@ -915,12 +916,12 @@ export default function ContactPage() {
                       <textarea
                         name="ticketMessage"
                         required
-                        rows="6"
+                        rows={6}
                         value={formData.ticketMessage}
                         onChange={(e) => updateFormData('ticketMessage', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Please provide detailed information about your issue, including any error messages or steps to reproduce..."
-                        maxLength="1000"
+                        maxLength={1000}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.ticketMessage.length}/1000 characters
@@ -1026,12 +1027,12 @@ export default function ContactPage() {
                       <textarea
                         name="proposalDetails"
                         required
-                        rows="6"
+                        rows={6}
                         value={formData.proposalDetails}
                         onChange={(e) => updateFormData('proposalDetails', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Please describe your partnership proposal, what value you can bring, and how we can work together..."
-                        maxLength="1000"
+                        maxLength={1000}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {formData.proposalDetails.length}/1000 characters
@@ -1168,7 +1169,7 @@ export default function ContactPage() {
                       width="100%"
                       height="200"
                       style={{ border: 0 }}
-                      allowFullScreen=""
+                      allowFullScreen
                       loading="lazy"
                       referrerPolicy="no-referrer-when-downgrade"
                       className="rounded-lg"

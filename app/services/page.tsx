@@ -8,39 +8,77 @@ import Footer from '../../components/Footer';
 
 export default function ServicesPage() {
   const [mounted, setMounted] = useState(false);
-  const [activeServiceTabs, setActiveServiceTabs] = useState({});
-  const [selectedService, setSelectedService] = useState(null);
-  const [comparisonServices, setComparisonServices] = useState([]);
+ const [activeServiceTabs, setActiveServiceTabs] = useState<{ [key: number]: string }>({});
+  type ServiceType = {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+  complexity: string;
+  duration: string;
+  teamSize: string;
+  price: string;
+  category: string;
+  roi: string;
+  testimonial: { rating: number };
+  features: string[];
+  deliverables: string[];
+  technologies: string[];
+};
+
+const [selectedService, setSelectedService] = useState<ServiceType | null>(null);
+  const [comparisonServices, setComparisonServices] = useState<any[]>([]);
   const [activeFilter, setActiveFilter] = useState('all');
   const [showGetStartedModal, setShowGetStartedModal] = useState(false);
-  const [selectedServiceForStart, setSelectedServiceForStart] = useState(null);
+  const [selectedServiceForStart, setSelectedServiceForStart] = useState<any>(null);
   const [showAIDiagnosisModal, setShowAIDiagnosisModal] = useState(false);
   const [aiDiagnosisStep, setAIDiagnosisStep] = useState(1);
   const [getStartedStep, setGetStartedStep] = useState(1);
   const [showQuoteModal, setShowQuoteModal] = useState(false);
-  const [selectedServiceForQuote, setSelectedServiceForQuote] = useState(null);
+  const [selectedServiceForQuote, setSelectedServiceForQuote] = useState<any | null>(null);
   const [quoteStep, setQuoteStep] = useState(1);
-  const [quoteData, setQuoteData] = useState({
-    fullName: '',
-    email: '',
-    phone: '',
-    company: '',
-    jobTitle: '',
-    projectDescription: '',
-    budget: '',
-    timeline: '',
-    urgency: '',
-    specificRequirements: '',
-    additionalServices: [],
-    deliveryPreference: '',
-    preferredMeetingTime: '',
-    communicationChannel: '',
-    hasWorkedWithConsultants: '',
-    biggestChallenge: '',
-    successDefinition: '',
-    agreeToTerms: false,
-    subscribeUpdates: false
-  });
+  const [quoteData, setQuoteData] = useState<{
+  fullName: string;
+  email: string;
+  phone: string;
+  company: string;
+  jobTitle: string;
+  projectDescription: string;
+  budget: string;
+  timeline: string;
+  urgency: string;
+  specificRequirements: string;
+  additionalServices: string[]; // ✅ key fix
+  deliveryPreference: string;
+  preferredMeetingTime: string;
+  communicationChannel: string;
+  hasWorkedWithConsultants: string;
+  biggestChallenge: string;
+  successDefinition: string;
+  agreeToTerms: boolean;
+  subscribeUpdates: boolean;
+}>({
+  fullName: '',
+  email: '',
+  phone: '',
+  company: '',
+  jobTitle: '',
+  projectDescription: '',
+  budget: '',
+  timeline: '',
+  urgency: '',
+  specificRequirements: '',
+  additionalServices: [], // ✅ now correctly typed as string[]
+  deliveryPreference: '',
+  preferredMeetingTime: '',
+  communicationChannel: '',
+  hasWorkedWithConsultants: '',
+  biggestChallenge: '',
+  successDefinition: '',
+  agreeToTerms: false,
+  subscribeUpdates: false,
+});
+
   const [aiDiagnosisData, setAIDiagnosisData] = useState({
     businessStage: '',
     revenue: '',
@@ -664,19 +702,19 @@ export default function ServicesPage() {
 
   const filteredServices = activeFilter === 'all' ? services : services.filter((service) => service.category === activeFilter);
 
-  const addToComparison = (service) => {
+  const addToComparison = (service:any) => {
     if (comparisonServices.length < 3 && !comparisonServices.find((s) => s.id === service.id)) {
       setComparisonServices([...comparisonServices, service]);
     }
   };
 
-  const handleGetStarted = (service) => {
+  const handleGetStarted = (service :any) => {
     setSelectedServiceForStart(service);
     setShowGetStartedModal(true);
     setGetStartedStep(1);
   };
 
-  const handleGetQuote = (service) => {
+  const handleGetQuote = (service:any) => {
     if (!mounted) return;
 
     setSelectedServiceForQuote(service);
@@ -707,17 +745,19 @@ export default function ServicesPage() {
     }
   };
 
-  const handleQuoteFormSubmit = async (e) => {
+ const handleQuoteFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+
     e.preventDefault();
     if (!mounted) return;
+try {
+   const quoteSubmissionData = {
+  serviceId: selectedServiceForQuote!.id,
+  serviceName: selectedServiceForQuote!.title,
+  servicePrice: selectedServiceForQuote!.price,
+  serviceDuration: selectedServiceForQuote!.duration,
+  serviceCategory: selectedServiceForQuote!.category,
 
-    try {
-      const quoteSubmissionData = {
-        serviceId: selectedServiceForQuote.id,
-        serviceName: selectedServiceForQuote.title,
-        servicePrice: selectedServiceForQuote.price,
-        serviceDuration: selectedServiceForQuote.duration,
-        serviceCategory: selectedServiceForQuote.category,
+
 
         fullName: quoteData.fullName,
         email: quoteData.email,
@@ -757,14 +797,15 @@ export default function ServicesPage() {
     }
   };
 
-  const handleQuoteDataUpdate = (field, value) => {
+  const handleQuoteDataUpdate = (field: any, value: any) => {
+
     if (!mounted) return;
 
-    setQuoteData(prev => {
+    setQuoteData((prev: any) => {
       if (field === 'additionalServices') {
         const currentServices = prev.additionalServices || [];
         const newServices = currentServices.includes(value)
-          ? currentServices.filter(s => s !== value)
+          ?(currentServices as any[]).filter(s => s !== value)
           : [...currentServices, value];
         return { ...prev, additionalServices: newServices };
       }
@@ -786,7 +827,8 @@ export default function ServicesPage() {
     }
   };
 
-  const isQuoteStepValid = (step) => {
+ const isQuoteStepValid = (step: any) => {
+
     if (!mounted) return false;
 
     switch (step) {
@@ -809,14 +851,17 @@ export default function ServicesPage() {
     setAIDiagnosisStep(1);
   };
 
-  const handleAIDiagnosisResponse = (questionId, value) => {
+ const handleAIDiagnosisResponse = (questionId: any, value: any) => {
+
     if (!mounted) return;
 
     setAIDiagnosisData((prev) => {
       const question = aiDiagnosisQuestions.find((q) => q.id === questionId);
       if (question?.multiple) {
-        const currentValues = prev[questionId] || [];
-        const newValues = currentValues.includes(value) ? currentValues.filter((v) => v !== value) : [...currentValues, value];
+        const currentValues = (prev[questionId as keyof typeof prev] || []) as any[];
+const newValues = currentValues.includes(value)
+  ? currentValues.filter((v: any) => v !== value)
+  : [...currentValues, value];
         return { ...prev, [questionId]: newValues };
       } else {
         return { ...prev, [questionId]: value };
@@ -859,17 +904,18 @@ export default function ServicesPage() {
     return aiDiagnosisQuestions[aiDiagnosisStep - 1];
   };
 
-  const isAIQuestionAnswered = (question) => {
+  const isAIQuestionAnswered = (question:any) => {
     if (!mounted) return false;
 
-    const answer = aiDiagnosisData[question.id];
+   const answer = aiDiagnosisData[question.id as keyof typeof aiDiagnosisData];
+
     if (question.multiple) {
       return Array.isArray(answer) && answer.length > 0;
     }
     return answer && answer.length > 0;
   };
 
-  const handleQuickStart = (service) => {
+  const handleQuickStart = (service:any) => {
     if (!mounted) return;
 
     try {
@@ -891,7 +937,7 @@ export default function ServicesPage() {
     }
   };
 
-  const handleQuickQuote = (service) => {
+  const handleQuickQuote = (service:any) => {
     if (!mounted) return;
 
     setSelectedServiceForStart(service);
@@ -901,14 +947,16 @@ export default function ServicesPage() {
 
   useEffect(() => {
     setMounted(true);
-    const initialTabs = {};
+    const initialTabs: { [key: number]: string } = {};
+
     services.forEach((service) => {
       initialTabs[service.id] = 'features';
     });
     setActiveServiceTabs(initialTabs);
   }, []);
 
-  const handleServiceTabChange = (serviceId, tab) => {
+  const handleServiceTabChange = (serviceId: any, tab: any) => {
+
     if (!mounted) return;
 
     setActiveServiceTabs((prev) => ({ ...prev, [serviceId]: tab }));
@@ -1326,12 +1374,12 @@ export default function ServicesPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">Project Description *</label>
                       <textarea
                         required
-                        rows="4"
+                        rows={4}
                         value={quoteData.projectDescription}
                         onChange={(e) => handleQuoteDataUpdate('projectDescription', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Describe your project, goals, and what you hope to achieve..."
-                        maxLength="1000"
+                        maxLength={100}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {quoteData.projectDescription.length}/1000 characters
@@ -1403,12 +1451,12 @@ export default function ServicesPage() {
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Specific Requirements</label>
                       <textarea
-                        rows="3"
+                        rows={3}
                         value={quoteData.specificRequirements}
                         onChange={(e) => handleQuoteDataUpdate('specificRequirements', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Any specific requirements, constraints, or preferences..."
-                        maxLength="500"
+                        maxLength={500}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {quoteData.specificRequirements.length}/500 characters
@@ -1429,12 +1477,12 @@ export default function ServicesPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">What's your biggest business challenge? *</label>
                       <textarea
                         required
-                        rows="4"
+                        rows={4}
                         value={quoteData.biggestChallenge}
                         onChange={(e) => handleQuoteDataUpdate('biggestChallenge', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="Describe the main challenge you're facing that this service will help address..."
-                        maxLength="500"
+                        maxLength={500}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {quoteData.biggestChallenge.length}/500 characters
@@ -1445,12 +1493,12 @@ export default function ServicesPage() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">How do you define success for this project? *</label>
                       <textarea
                         required
-                        rows="4"
+                        rows={4}
                         value={quoteData.successDefinition}
                         onChange={(e) => handleQuoteDataUpdate('successDefinition', e.target.value)}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1F3D3A]"
                         placeholder="What outcomes would make you consider this project a success?"
-                        maxLength="500"
+                        maxLength={500}
                       />
                       <div className="text-sm text-gray-500 mt-1">
                         {quoteData.successDefinition.length}/500 characters
@@ -1730,10 +1778,12 @@ export default function ServicesPage() {
                       key={index}
                       className={`flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all duration-200 hover:border-purple-500 ${
                         getCurrentAIQuestion()?.multiple
-                          ? aiDiagnosisData[getCurrentAIQuestion().id] instanceof Array && aiDiagnosisData[getCurrentAIQuestion().id].includes(option.value)
+? Array.isArray(aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData]) &&
+  (aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData] as string[]).includes(option.value)
                             ? 'border-purple-500 bg-purple-50'
                             : 'border-gray-200'
-                          : aiDiagnosisData[getCurrentAIQuestion().id] === option.value
+                          : aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData] === option.value
+
                           ? 'border-purple-500 bg-purple-50'
                           : 'border-gray-200'
                       }`}
@@ -1745,8 +1795,10 @@ export default function ServicesPage() {
                         onChange={(e) => handleAIDiagnosisResponse(getCurrentAIQuestion().id, e.target.value)}
                         checked={
                           getCurrentAIQuestion()?.multiple
-                            ? aiDiagnosisData[getCurrentAIQuestion().id] instanceof Array && aiDiagnosisData[getCurrentAIQuestion().id].includes(option.value)
-                            : aiDiagnosisData[getCurrentAIQuestion().id] === option.value
+? Array.isArray(aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData]) &&
+  (aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData] as string[]).includes(option.value)
+                            : aiDiagnosisData[getCurrentAIQuestion().id as keyof typeof aiDiagnosisData] === option.value
+
                         }
                         className="w-5 h-5 text-purple-600 border-2 border-gray-300 rounded focus:ring-purple-500"
                       />
@@ -2287,6 +2339,7 @@ export default function ServicesPage() {
                   <div className="w-16 h-16 flex items-center justify-center bg-gradient-to-br from-[#1F3D3A] to-green-600 rounded-2xl text-white">
                     <i className={`${selectedServiceForStart.icon} text-2xl`}></i>
                   </div>
+
                   <div>
                     <h2 className="text-2xl font-bold text-[#1F3D3A]">Get Quote for {selectedServiceForStart.title}</h2>
                     <p className="text-gray-600">Complete your business registration to receive a personalized quote</p>
@@ -2327,7 +2380,7 @@ export default function ServicesPage() {
                   <div>
                     <h3 className="font-semibold text-[#1F3D3A] mb-2">Key Features</h3>
                     <ul className="space-y-1 text-sm">
-                      {selectedServiceForStart.features.slice(0, 4).map((feature, index) => (
+                      {selectedServiceForStart.features.slice(0, 4).map((feature: any, index: any) =>(
                         <li key={index} className="flex items-center text-gray-600">
                           <i className="ri-check-line text-green-500 mr-2 text-xs"></i>
                           {feature}
